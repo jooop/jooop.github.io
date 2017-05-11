@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一个个人博客">
+    <meta name="keyword" content="null">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+	<meta name="google-site-verification" content="c7x8WiOE15RKbJLbCTaZMGqjKzoUdfpyVmrmJ8nTq8M" />
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="Jooop" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        python3网易新闻爬虫｜Jooop&#39;s blog
+        
+    </title>
+
+    <link rel="canonical" href="http://jooop.github.io/2017/01/29/python3网易爬虫/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('//odl4eqqu9.bkt.clouddn.com/bg/44307-105.jpg')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    Jooop
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/tags/">tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+
+<!--only post-->
+
+
+<img class="wechat-title-img"
+     src="http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg">
+
+
+<style>
+    
+    header.intro-header {
+        background-image: url('http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg')
+    }
+
+    
+</style>
+
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>python3网易新闻爬虫</h1>
+                    
+                    <h2 class="subheading">python3编写网易爬虫，并部署至centos服务器运行。</h2>
+                    
+                    <span class="meta">
+                         作者 jooop
+                        <span>
+                          日期 2017-01-29
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#python"
+                           title="python">python</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            python3网易新闻爬虫
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+                <h2 id="一、背景："><a href="#一、背景：" class="headerlink" title="一、背景："></a>一、背景：</h2><p>　　因为另一项目新闻管理系统的需要，以及作为熟悉python基础的练手项目，现准备用python写一个网易新闻爬虫，为新闻管理系统项目获取新闻内容，以解决新闻源的自动获取、添加到数据库的问题。</p>
+<h2 id="二、目标："><a href="#二、目标：" class="headerlink" title="二、目标："></a>二、目标：</h2><p>　　实现自动化获取网易新闻不同类别的新闻列表url，然后分别爬取新闻内容并存入新闻管理系统项目的mysql数据库，以供新闻管理系统的使用。</p>
+<h2 id="三、参考："><a href="#三、参考：" class="headerlink" title="三、参考："></a>三、参考：</h2><p>　　因为对python的爬虫和html解析模块不是很了解，因此在写的过程中查阅参考了许多模块的教程和资料。另外对于html页面中的标签正则，经查阅后使用断言以解决。<br>　　具体的爬虫结构，链接和正文内容的解析与正则模式、数据存储表均为自己设计。</p>
+<h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><ol>
+<li>编写简单的网络爬虫 (python3.2)<br> <a href="http://blog.csdn.net/database_zbye/article/details/38826893" target="_blank" rel="external">http://blog.csdn.net/database_zbye/article/details/38826893</a></li>
+<li>Python requests模块学习笔记<br> <a href="http://www.cnblogs.com/tangdongchu/p/4229049.html" target="_blank" rel="external">http://www.cnblogs.com/tangdongchu/p/4229049.html</a></li>
+<li>采用beautifulsoup库 解析html页面<br> <a href="http://blog.csdn.net/weiyuanke/article/details/16986639" target="_blank" rel="external">http://blog.csdn.net/weiyuanke/article/details/16986639</a></li>
+<li>《零基础学python》（第二版）»第七章 保存数据 »MySQL数据库(2)<br> <a href="http://docs.pythontab.com/learnpython/231/" target="_blank" rel="external">http://docs.pythontab.com/learnpython/231/</a></li>
+<li>正则表达式分组、断言详解<br> <a href="http://www.cnblogs.com/iyangyuan/archive/2013/05/30/3107390.html" target="_blank" rel="external">http://www.cnblogs.com/iyangyuan/archive/2013/05/30/3107390.html</a></li>
+</ol>
+<h2 id="四、分析："><a href="#四、分析：" class="headerlink" title="四、分析："></a>四、分析：</h2><h3 id="（一）、新闻爬虫业务流程分析："><a href="#（一）、新闻爬虫业务流程分析：" class="headerlink" title="（一）、新闻爬虫业务流程分析："></a>（一）、新闻爬虫业务流程分析：</h3><ol>
+<li>爬取新闻列表的html页面,解析出新闻的url,存入队列。</li>
+<li>从队列中取出一个url,爬取新闻内容的html页面，进行解析，将解析出的标题、正文、来源、时间、图片等结果放入数据库。</li>
+</ol>
+<h3 id="（二）、实现过程中几个细节分析："><a href="#（二）、实现过程中几个细节分析：" class="headerlink" title="（二）、实现过程中几个细节分析："></a>（二）、实现过程中几个细节分析：</h3><h4 id="1-模块的选择和列表页面的爬取："><a href="#1-模块的选择和列表页面的爬取：" class="headerlink" title="1. 模块的选择和列表页面的爬取："></a>1. 模块的选择和列表页面的爬取：</h4><p>　　在看了一些入门文章后，开始打算使用requests模块爬取新闻列表和正文页面，然后使用BeautifulSoup加lxml对页面进行解析，在对网易新闻列表的加载方式经过一番研究后，通过浏览器的开发者工具提取到动态JS加载的新闻标题列表的JSON页面的链接，用手工提取不同分类的JSON链接地址，然后通过<strong>requests模块</strong>来获取页面。</p>
+<h4 id="2-提取新闻url："><a href="#2-提取新闻url：" class="headerlink" title="2. 提取新闻url："></a>2. 提取新闻url：</h4><p>　　对于列表地址的解析，因为没有了解过JSON数据的处理方式，为了方便起见使用了断言式正则规则来提取出新闻的url。</p>
+<h4 id="3-将url存入队列"><a href="#3-将url存入队列" class="headerlink" title="3. 将url存入队列"></a>3. 将url存入队列</h4><p>　　为了标识已经访问过的新闻链接，防止程序突然崩溃导致的队列数据丢失和简单的链接去重。<strong>使用数据库作为存放新闻页面链接的队列</strong>，titles表结构如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">数据类型</th>
+<th style="text-align:left">Key</th>
+<th style="text-align:left">Default</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">url</td>
+<td style="text-align:left">varchar(100)</td>
+<td style="text-align:left">PRI</td>
+<td style="text-align:left">NULL</td>
+<td>存放新闻url</td>
+</tr>
+<tr>
+<td style="text-align:left">category</td>
+<td style="text-align:left">varchar(10)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>存放分类信息</td>
+</tr>
+<tr>
+<td style="text-align:left">flag</td>
+<td style="text-align:left">tinyint(4)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>标记是否获取过内容</td>
+</tr>
+</tbody>
+</table>
+<p>　　将url设置为主键，并且在存入新闻链接时使用<code>insert ignore into ...</code>语句来保证url不会重复，在<strong>新插入url的同时将flag设置为0，表示该页面待爬取</strong>。<br>在存入解析完的新闻数据的同时，将titles表中，相对应的url的flag设置为1，表示已经爬取过该页面。</p>
+<h4 id="4-获取新闻界面"><a href="#4-获取新闻界面" class="headerlink" title="4. 获取新闻界面"></a>4. 获取新闻界面</h4><p>　　同第一步中获取新闻列表界面一样，直接使用requests模块获取页面。因此直接调用其函数。</p>
+<h4 id="5-解析新闻界面"><a href="#5-解析新闻界面" class="headerlink" title="5. 解析新闻界面"></a>5. 解析新闻界面</h4><p>　　对于新闻内容的提取用到了<code>BeautifulSoup</code>模块和正则表达式混合进行解析。另外因为网易新闻有些html样式不统一，此处<strong>解析只针对占主流的页面样式</strong>，对于无法解析的页面进行提示并标记。<br>　　另外因为考虑到新闻管理系统需要取出新闻正文，再输出到html界面进行展示，因此对新闻正文的html标签没有使用正则去除、而是原样式保存到数据库。</p>
+<h4 id="6-将解析出的数据存入数据库，同时对已获取内容的url标记"><a href="#6-将解析出的数据存入数据库，同时对已获取内容的url标记" class="headerlink" title="6. 将解析出的数据存入数据库，同时对已获取内容的url标记"></a>6. 将解析出的数据存入数据库，同时对已获取内容的url标记</h4><p>　　将成功解析的数据存入<code>news表</code>中，并将<code>titles表</code>相对应的url的flag设置为1，表示已经获取过该新闻内容。此处遇到过正文、来源等数据长度超过数据库的表字段长度，导致程序中断的问题，对此解决方法是在执行该插入操作时捕获异常，然后对该新闻的url进行flag标记设置为2，跳过此新闻的获取。<br>　　将内容格式无法解析的url的flag设置为2，表示已经试图爬取过该页面内容，但是无法获取该新闻。<br>　　news表结构如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">数据类型</th>
+<th style="text-align:left">Key</th>
+<th style="text-align:left">Default</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">newsId</td>
+<td style="text-align:left">bigint(20)</td>
+<td style="text-align:left">PRI</td>
+<td style="text-align:left">NULL</td>
+<td>新闻ID</td>
+</tr>
+<tr>
+<td style="text-align:left">title</td>
+<td style="text-align:left">varchar(40)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>标题</td>
+</tr>
+<tr>
+<td style="text-align:left">content</td>
+<td style="text-align:left">text</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>正文</td>
+</tr>
+<tr>
+<td style="text-align:left">imageUrl</td>
+<td style="text-align:left">varchar(180)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>首个图片地址（做封面）</td>
+</tr>
+<tr>
+<td style="text-align:left">date</td>
+<td style="text-align:left">timestamp</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">CURRENT_TIMESTAMP</td>
+<td>日期</td>
+</tr>
+<tr>
+<td style="text-align:left">source</td>
+<td style="text-align:left">varchar(50)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>来源</td>
+</tr>
+<tr>
+<td style="text-align:left">clickTraffic</td>
+<td style="text-align:left">bigint(20)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">0</td>
+<td>点击量</td>
+</tr>
+<tr>
+<td style="text-align:left">category</td>
+<td style="text-align:left">varchar(10)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>分类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="五、开发："><a href="#五、开发：" class="headerlink" title="五、开发："></a>五、开发：</h2><h3 id="（一）、开发环境及工具配置："><a href="#（一）、开发环境及工具配置：" class="headerlink" title="（一）、开发环境及工具配置："></a>（一）、开发环境及工具配置：</h3><p>　　开发环境：windows10<br>　　开发语言：python3.5<br>　　开发工具：IDEL、MySql5.7<br>　　使用模块：BeautifulSoup、requests、lxml、pymysql</p>
+<h3 id="（二）、建表语句："><a href="#（二）、建表语句：" class="headerlink" title="（二）、建表语句："></a>（二）、建表语句：</h3><p>　　title表：<br>　　<code>create table titles(
+　　url varchar(100) primary key,
+　　category varchar(10),
+　　flag tinyint not null default 0
+　　);</code><br>　　news表：<br>　　<code>create table news(
+　　newsId bigint primary key auto_increment,
+　　title varchar(40),
+　　content text,
+　　imageUrl varchar(180),
+　　date timestamp,
+　　source varchar(50),
+　　clickTraffic bigint default 0,
+　　category varchar(10)
+　　);</code></p>
+<h3 id="（三）、源码："><a href="#（三）、源码：" class="headerlink" title="（三）、源码："></a>（三）、源码：</h3><figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/python3</span></div><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</div><div class="line"><span class="keyword">import</span> requests</div><div class="line"><span class="keyword">import</span> lxml</div><div class="line"><span class="keyword">import</span> re</div><div class="line"><span class="keyword">import</span> pymysql</div><div class="line"></div><div class="line"><span class="keyword">import</span> warnings</div><div class="line">warnings.filterwarnings(<span class="string">"ignore"</span>)</div><div class="line"></div><div class="line"><span class="comment">#获取html页面</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">GetPage</span><span class="params">(url)</span>:</span></div><div class="line">	    headers=&#123;</div><div class="line">	            <span class="string">'User-Agent'</span>:<span class="string">'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'</span></div><div class="line">	            &#125;</div><div class="line">	    data=requests.get(url,headers=headers)</div><div class="line">	    <span class="keyword">return</span> data</div><div class="line">	</div><div class="line">	<span class="comment">#解析ListPage，返回新闻列表的链接</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">TakenList</span><span class="params">(page)</span>:</span></div><div class="line">	    href=re.compile(<span class="string">r'(?&lt;="docurl":").*(?=",)'</span>) </div><div class="line">	    urls=href.findall(page.text)<span class="comment">#新闻列表的href正则规则</span></div><div class="line">	    <span class="keyword">return</span> urls</div><div class="line">	</div><div class="line">	<span class="comment">#将新闻url添加到数据库中</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">UseSql</span><span class="params">(urls,category)</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor() <span class="comment">#利用连接对象得到游标对象</span></div><div class="line">	    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</div><div class="line">	        cur.execute(<span class="string">"insert ignore into titles (url,category) values (%s,%s)"</span>,(url,category))<span class="comment">#此句行过程中，若数据库中已经存在目标utl，则不进行存储，并抛出一条警告</span></div><div class="line">	    conn.commit()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	</div><div class="line">	<span class="comment">#获取数据库中flag为0的url，返回urls[]</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">GetSql</span><span class="params">()</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor() <span class="comment">#利用连接对象得到游标对象</span></div><div class="line">	    cur.execute(<span class="string">"select url,category from titles where flag=0"</span>)</div><div class="line">	    lines=cur.fetchall()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    <span class="keyword">return</span> lines</div><div class="line">	</div><div class="line">	</div><div class="line">	<span class="comment">#解析NewsPage</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">TakenNews</span><span class="params">(data)</span>:</span></div><div class="line">	    mdict=&#123;&#125;</div><div class="line">	    soup=BeautifulSoup(data.text,<span class="string">'lxml'</span>)</div><div class="line">	    div1=soup.find(<span class="string">'div'</span>,class_=<span class="string">'post_content_main'</span>)</div><div class="line">	    <span class="keyword">if</span> repr(div1)!=<span class="string">"None"</span>:</div><div class="line">	        title=div1.find(<span class="string">'h1'</span>).text<span class="comment">#【标题】</span></div><div class="line">	        post_time_source=div1.find(<span class="string">'div'</span>,class_=<span class="string">'post_time_source'</span>).text</div><div class="line">	        <span class="comment">#(post_time_source需要再分别正则出时间和来源)</span></div><div class="line">	        opbody=div1.find(<span class="string">'div'</span>,class_=<span class="string">'post_text'</span>)</div><div class="line">	        <span class="comment">#(body需要再除去&lt;div style="position:relative;"&gt;....&lt;/div&gt;)</span></div><div class="line">	        image=opbody.find(<span class="string">"img"</span>)<span class="comment">#因为需要在新闻系统列表上显示图片，所以需要一条图片地址</span></div><div class="line">	        <span class="comment">#(需要再正则出src内容)</span></div><div class="line">	        time=re.search(<span class="string">r'\d&#123;4&#125;-\d&#123;2&#125;-\d&#123;2&#125; \d&#123;2&#125;:\d&#123;2&#125;\:\d&#123;2&#125;'</span>,post_time_source).group(<span class="number">0</span>)<span class="comment">#匹配格式2016-11-19 22:14:05</span></div><div class="line">	        <span class="comment">#【时间】</span></div><div class="line">	        <span class="keyword">if</span> repr(re.search(<span class="string">r'来源.*'</span>,post_time_source))!=<span class="string">'None'</span>:</div><div class="line">	            source=re.search(<span class="string">r'来源.*'</span>,post_time_source).group(<span class="number">0</span>).strip()</div><div class="line">	            source=<span class="string">' '</span>.join(source.split())</div><div class="line">	        <span class="keyword">else</span>:</div><div class="line">	            source=<span class="string">'网易新闻'</span></div><div class="line">	        <span class="comment">#【来源】</span></div><div class="line">	        body=re.sub(<span class="string">r'\n'</span>,<span class="string">''</span>,repr(opbody))</div><div class="line">	        body=re.sub(<span class="string">r'&lt;div class="gg200x300"&gt;(.*?)&lt;/div&gt;&lt;/div&gt;'</span>,<span class="string">''</span>,body)</div><div class="line">	        <span class="comment">#【内容】</span></div><div class="line">	        <span class="keyword">if</span> repr(image)!=<span class="string">'None'</span>: <span class="comment">#若该新闻没有image，则将image标记为0</span></div><div class="line">	            image=re.sub(<span class="string">r'data-src|data-origin-src'</span>,<span class="string">''</span>,repr(image))    <span class="comment">#删除掉微信图片地址</span></div><div class="line">	            image=re.search(<span class="string">r'(?&lt;=src=")http:(.*?)(?=")'</span>,image).group(<span class="number">0</span>)</div><div class="line">	        <span class="keyword">else</span>:</div><div class="line">	            image=<span class="number">0</span></div><div class="line">	        <span class="comment">#【image的url】</span></div><div class="line">	        mdict[<span class="string">'解析状态'</span>]=<span class="string">"成功解析"</span></div><div class="line">	        mdict[<span class="string">'title'</span>]=title</div><div class="line">	        mdict[<span class="string">'time'</span>]=time</div><div class="line">	        mdict[<span class="string">'source'</span>]=source</div><div class="line">	        mdict[<span class="string">'body'</span>]=body</div><div class="line">	        mdict[<span class="string">'image'</span>]=image</div><div class="line">	    <span class="keyword">else</span>:</div><div class="line">	        mdict[<span class="string">'解析状态'</span>]=<span class="string">"无法解析"</span></div><div class="line">	    <span class="keyword">return</span> mdict</div><div class="line">	</div><div class="line">	<span class="comment">#将新闻数据存入数据库，同时将title的flag设为1</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">Putsql</span><span class="params">(mdict,category,purl)</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor()</div><div class="line">	    cur.execute(<span class="string">"insert into news (title,date,source,imageUrl,content,category) values (%s,%s,%s,%s,%s,%s)"</span>,</div><div class="line">	                    (mdict[<span class="string">'title'</span>],mdict[<span class="string">'time'</span>],mdict[<span class="string">'source'</span>],mdict[<span class="string">'image'</span>],mdict[<span class="string">'body'</span>],category))</div><div class="line">	    cur.execute(<span class="string">"update titles set flag=1 where url=%s"</span>,(purl))</div><div class="line">	    conn.commit()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    print(<span class="string">"成功添加新闻"</span>,mdict[<span class="string">'title'</span>],<span class="string">"\n"</span>)</div><div class="line">	</div><div class="line">	<span class="comment">#无法解析的页面，将其忽略掉，同时将title的flag设为2</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">Putsql</span><span class="params">(mdict,category,purl)</span>:</span></div><div class="line">    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">    cur = conn.cursor()</div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        cur.execute(<span class="string">"insert into news (title,date,source,imageUrl,content,category) values (%s,%s,%s,%s,%s,%s)"</span>,</div><div class="line">                        (mdict[<span class="string">'title'</span>],mdict[<span class="string">'time'</span>],mdict[<span class="string">'source'</span>],mdict[<span class="string">'image'</span>],mdict[<span class="string">'body'</span>],category))</div><div class="line">        cur.execute(<span class="string">"update titles set flag=1 where url=%s"</span>,(purl))</div><div class="line">        conn.commit()</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        cur.execute(<span class="string">"update titles set flag=2 where url=%s"</span>,(purl))</div><div class="line">    <span class="keyword">finally</span>:</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    print(<span class="string">"成功添加新闻"</span>,mdict[<span class="string">'title'</span>],<span class="string">"\n"</span>)</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">#main</span></div><div class="line">count=<span class="number">0</span></div><div class="line">NewsCategory=&#123;<span class="string">'国内'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_guonei.js?callback=data_callback'</span>,</div><div class="line">        <span class="string">'国际'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_guoji.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'社会'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_shehui.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'军事'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_war.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'体育'</span>:<span class="string">'http://sports.163.com/special/000587PR/newsdata_n_world.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'娱乐'</span>:<span class="string">'http://ent.163.com/special/000380VU/newsdata_index.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'科技'</span>:<span class="string">'http://tech.163.com/special/00097UHL/tech_datalist.js?callback=data_callback'</span></div><div class="line">          &#125;</div><div class="line"><span class="keyword">for</span> category <span class="keyword">in</span> NewsCategory:</div><div class="line">    print(<span class="string">"正在获取"</span>+category+<span class="string">"新闻列表"</span>)</div><div class="line">    category_url=NewsCategory[category]</div><div class="line">    listpage=GetPage(category_url)   <span class="comment">#获取标题列表页面</span></div><div class="line">    listurls=TakenList(listpage)            <span class="comment">#解析出标题列表数据</span></div><div class="line">    UseSql(listurls,category)                        <span class="comment">#将列表放入数据库</span></div><div class="line">    print(category+<span class="string">"列表更新完成，开始获取新闻"</span>)</div><div class="line">    pageurls=GetSql()                       <span class="comment">#从数据库获取未访问过的列表</span></div><div class="line">     <span class="comment">#依次访问这些列表</span></div><div class="line">    <span class="keyword">for</span> pageurl <span class="keyword">in</span> pageurls:               </div><div class="line">        purl=<span class="string">''</span>.join(list(pageurl[<span class="number">0</span>]))      <span class="comment">#取出新闻地址</span></div><div class="line">        pcategory=<span class="string">''</span>.join(list(pageurl[<span class="number">1</span>]))<span class="comment">#取出新闻类型</span></div><div class="line">        newspage=GetPage(purl)                  <span class="comment">#获取新闻内容页面</span></div><div class="line">        mdict=TakenNews(newspage)                   <span class="comment">#解析出标题、内容等信息</span></div><div class="line">        <span class="keyword">if</span> mdict[<span class="string">'解析状态'</span>]==<span class="string">"成功解析"</span>:</div><div class="line">            Putsql(mdict,pcategory,purl,)</div><div class="line">            count=count+<span class="number">1</span></div><div class="line">        <span class="keyword">elif</span> mdict[<span class="string">'解析状态'</span>]==<span class="string">"无法解析"</span>:</div><div class="line">            Delsql(purl)</div><div class="line">            print(<span class="string">"无法解析页面："</span>+purl+<span class="string">"，已跳过"</span>)</div><div class="line">print(<span class="string">'本次新闻获取已完成，共更新"'</span>+repr(count)+<span class="string">'"条新闻。'</span>)</div></pre></td></tr></table></figure>
+<h2 id="六、测试："><a href="#六、测试：" class="headerlink" title="六、测试："></a>六、测试：</h2><h3 id="（一）、本地运行测试："><a href="#（一）、本地运行测试：" class="headerlink" title="（一）、本地运行测试："></a>（一）、本地运行测试：</h3><ol>
+<li>运行环境：win10、python3.5</li>
+<li>运行效果：<br>成功添加新闻和此次获取数目统计<br><img src="./获取成功和统计.PNG" alt="Alt text"><br>　　对无法解析的页面将flag设置为2，跳过<br><img src="./对无法解析的进行跳过处理.PNG" alt="Alt text"></li>
+</ol>
+<h3 id="（二）、服务器定时运行测试："><a href="#（二）、服务器定时运行测试：" class="headerlink" title="（二）、服务器定时运行测试："></a>（二）、服务器定时运行测试：</h3><ol>
+<li><p>运行环境：centos6.5、python3.5</p>
+</li>
+<li><p>每小时定时运行设置：<br> 　　通过linux自带定时运行服务crontab进行设置，每小时自动运行。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">[root@iZm5e19ccp2hp43c52aze2Z ~]<span class="comment"># crontab -l</span></div><div class="line"><span class="comment">#!/bin/sh</span></div><div class="line"><span class="number">0</span> */<span class="number">1</span> * * * /usr/local/python3/bin/python3 /usr/local/news.py</div></pre></td></tr></table></figure>
+</li>
+<li><p>运行效果：<br>　　因定时运行服务不在控制台输出信息，<strong>效果可从网站前台页面查看：<a href="http://115.28.137.1:8080/" target="_blank" rel="external">http://115.28.137.1:8080/</a></strong>，每个小时整点与网易新闻同步更新。</p>
+<h2 id="七、工作评价："><a href="#七、工作评价：" class="headerlink" title="七、工作评价："></a>七、工作评价：</h2><p>　　此次开发为首次接触爬虫、也是首次实现完整的python程序，因此在爬虫结构设计、代码的实现上显得不够简洁、扩展性较差，对于细节的处理不够到位，对于另外一种新闻正文的页面形式没有进行解析而是直接跳过（此页面下多为自媒体投稿，新闻质量较差，所以没有考虑另外解析）。<br>　　每日新闻数据量较少、并且在使用的过程中没有出现反爬虫等情况，因此没有考虑多线程和使用代理IP优化。<br>　　因为对java的jdbc较为熟悉，所以在使用pymysql对数据库操作时比较顺利。<br>　　总的来说，此次项目仅为熟悉python的练手项目，并且项目目的只为了在自己的项目中使用，所以只做了主要功能的实现。</p>
+</li>
+</ol>
+
+                <hr>
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                     style="text-align: right"
+                     data-thread-key="2017/01/29/python3网易爬虫/"
+                     data-title="python3网易新闻爬虫"
+                     data-url="http://jooop.github.io/2017/01/29/python3网易爬虫/"
+                     data-images=""
+                     data-content="一、背景：　　因为另一项目新闻管理系统的需要，以及作为熟悉python基础的练手项目，现准备用... | Jooop&#39;s blog ">
+                    <div class="ds-share-inline">
+                        <ul class="ds-share-icons-16">
+                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                        </ul>
+                        <div class="ds-share-icons-more">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/02/17/自定义Struts2框架分析/" data-toggle="tooltip" data-placement="top"
+                           title="自定义Struts框架分析">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/01/29/阿里云配置java-web环境/" data-toggle="tooltip" data-placement="top"
+                           title="阿里云配置java web环境">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                         data-thread-key="2017/01/29/python3网易爬虫/"
+                         data-title="python3网易新闻爬虫"
+                         data-url="http://jooop.github.io/2017/01/29/python3网易爬虫/">
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col">
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、背景："><span class="toc-text">一、背景：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、目标："><span class="toc-text">二、目标：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、参考："><span class="toc-text">三、参考：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#参考资料："><span class="toc-text">参考资料：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四、分析："><span class="toc-text">四、分析：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#（一）、新闻爬虫业务流程分析："><span class="toc-text">（一）、新闻爬虫业务流程分析：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#（二）、实现过程中几个细节分析："><span class="toc-text">（二）、实现过程中几个细节分析：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-模块的选择和列表页面的爬取："><span class="toc-text">1. 模块的选择和列表页面的爬取：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-提取新闻url："><span class="toc-text">2. 提取新闻url：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-将url存入队列"><span class="toc-text">3. 将url存入队列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-获取新闻界面"><span class="toc-text">4. 获取新闻界面</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-解析新闻界面"><span class="toc-text">5. 解析新闻界面</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-将解析出的数据存入数据库，同时对已获取内容的url标记"><span class="toc-text">6. 将解析出的数据存入数据库，同时对已获取内容的url标记</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#五、开发："><span class="toc-text">五、开发：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#（一）、开发环境及工具配置："><span class="toc-text">（一）、开发环境及工具配置：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#（二）、建表语句："><span class="toc-text">（二）、建表语句：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#（三）、源码："><span class="toc-text">（三）、源码：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#六、测试："><span class="toc-text">六、测试：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#（一）、本地运行测试："><span class="toc-text">（一）、本地运行测试：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#（二）、服务器定时运行测试："><span class="toc-text">（二）、服务器定时运行测试：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#七、工作评价："><span class="toc-text">七、工作评价：</span></a></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5 class="text-center">
+                        <a href="/tags/">FEATURED TAGS</a>
+                    </h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#python"
+                           title="python">python</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'jooop';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user};
+    (function () {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';
+        ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Jooop 2017
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    Theme by <a href="https://haojen.github.io/">Haojen Ma</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://jooop.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-84260933-1';
+    var _gaDomain = 'jooop.github.io';
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="http://odl4eqqu9.bkt.clouddn.com/ava/ava_cat.PNG">
+</body>
+
+</html>

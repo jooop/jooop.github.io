@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一个个人博客">
+    <meta name="keyword" content="null">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+	<meta name="google-site-verification" content="c7x8WiOE15RKbJLbCTaZMGqjKzoUdfpyVmrmJ8nTq8M" />
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="Jooop" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        JSP基础｜Jooop&#39;s blog
+        
+    </title>
+
+    <link rel="canonical" href="http://jooop.github.io/2016/10/14/JSP基础/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('//odl4eqqu9.bkt.clouddn.com/bg/44307-105.jpg')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    Jooop
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/tags/">tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+
+<!--only post-->
+
+
+<img class="wechat-title-img"
+     src="http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg">
+
+
+<style>
+    
+    header.intro-header {
+        background-image: url('http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg')
+    }
+
+    
+</style>
+
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>JSP基础</h1>
+                    
+                    <h2 class="subheading">对JSP基础内容的整理。</h2>
+                    
+                    <span class="meta">
+                         作者 jooop
+                        <span>
+                          日期 2016-10-14
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#J2EE"
+                           title="J2EE">J2EE</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            JSP基础
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+                <h1 id="JSP基本语法："><a href="#JSP基本语法：" class="headerlink" title="JSP基本语法："></a>JSP基本语法：</h1><h2 id="Declaretion-声明"><a href="#Declaretion-声明" class="headerlink" title="Declaretion  声明"></a>Declaretion  声明</h2><p>&lt;%! %&gt;    成员变量声明，只在servlet生成时声明一次，存在于整个servlet生命周期。（可声明方法）<br>&lt;% %&gt;    局部变量声明，每访问页面一次重新声明一次。（不可在其中声明方法）</p>
+<hr>
+<h2 id="Scriptlet-程序段"><a href="#Scriptlet-程序段" class="headerlink" title="Scriptlet  程序段"></a>Scriptlet  程序段</h2><p>&lt;%程序代码区%&gt;    可放入任何的Java程序代码</p>
+<hr>
+<h2 id="Expression-表达式"><a href="#Expression-表达式" class="headerlink" title="Expression  表达式"></a>Expression  表达式</h2><p>&lt;%= %&gt;<br>=后必须是字符串变量或者可以被转换成字符串的表达式，不需要以;结束</p>
+<hr>
+<h2 id="Comment-注释"><a href="#Comment-注释" class="headerlink" title="Comment  注释"></a>Comment  注释</h2><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;!-- html注释 --&gt;	(在客户端浏览器中可以看到)</div><div class="line">&lt;%--.......--%&gt;</div><div class="line">&lt;%<span class="comment">//......%&gt;</span></div><div class="line">&lt;%<span class="comment">/*......*/</span>%&gt;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="Directives-指令（编译期间执行的指令）"><a href="#Directives-指令（编译期间执行的指令）" class="headerlink" title="Directives 指令（编译期间执行的指令）"></a>Directives 指令（编译期间执行的指令）</h2><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;%<span class="meta">@Directive</span>属性=<span class="string">"属性值"</span>%&gt;</div></pre></td></tr></table></figure>
+<h3 id="常见Directive"><a href="#常见Directive" class="headerlink" title="常见Directive:"></a>常见Directive:</h3><h4 id="page"><a href="#page" class="headerlink" title="page:"></a>page:</h4><p>指明和JSP Container的沟通方式。<br>eg：<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line"> &lt;%<span class="meta">@page</span> <span class="keyword">import</span>=<span class="string">"importList"</span>|	--引入java类</div><div class="line">				errorPage=<span class="string">"errorPageUrl"</span>|	--当前页面出错后所显示的页面内容</div><div class="line">				isErrorPage=<span class="string">"true|false"</span>|	--当前页面是否是显示错误的页面</div><div class="line">				contenType=<span class="string">"contentTypeInfo"</span></div><div class="line">%&gt;</div></pre></td></tr></table></figure></p>
+<h4 id="include："><a href="#include：" class="headerlink" title="include："></a>include：</h4><p>将指定的JSP程序或者HTML文件包含进来(会在JSP转换时期先将file设定的文件包含进来，然后开始转换及编译)</p>
+<ul>
+<li><p>用法：</p>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;%<span class="meta">@include</span> file=<span class="string">"fileURL%"</span>&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>特点:</p>
+<blockquote>
+<ul>
+<li>一般用于非动态的代码，不能在fileURL后面传参数</li>
+<li>执行效率比较高</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h4 id="taglib"><a href="#taglib" class="headerlink" title="taglib"></a>taglib</h4><blockquote>
+<p>JSP API允许您自定义JSP标签，这些看起来像HTML或XML标签的玩意就是用户自定义标签集了。<br>Taglib指令引入自定义标签集，识别库路径，并且鉴别自定义标签。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">Taglib指令的语法格式如下：</div><div class="line">&lt;%@ taglib uri=<span class="string">"uri"</span> prefix=<span class="string">"prefixOfTag"</span> &gt;</div><div class="line">uri属性告诉容器位置，prefix属性告诉容器多少位是自定义标签的标记。</div><div class="line">等价的XML语法如下：</div><div class="line">&lt;jsp:directive.taglib uri=<span class="string">"uri"</span> prefix=<span class="string">"prefixOfTag"</span> /&gt;</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>当使用一个自定义标签的时候，典型的格式为<prefix:tagname>。prefix与prefix属性所指定的前缀一样，tagname就是标签名称了。</prefix:tagname></p>
+<hr>
+<h2 id="Action动作指令（运行期间执行的指令）"><a href="#Action动作指令（运行期间执行的指令）" class="headerlink" title="Action动作指令（运行期间执行的指令）"></a>Action动作指令（运行期间执行的指令）</h2><h3 id="jsp-useBean"><a href="#jsp-useBean" class="headerlink" title="jsp:useBean"></a>jsp:useBean</h3><ul>
+<li><p>基本要素:</p>
+<blockquote>
+<ul>
+<li>必须要有一个无参数的构造器。在JSP元素创建Bean时会调用空构造器。</li>
+<li>Bean类应没有任何公共实例变量，不许直接访问实例变量。</li>
+<li>通过getter/setter方法读/写变量的值。</li>
+</ul>
+</blockquote>
+</li>
+<li><p>用法</p>
+<blockquote>
+<figure class="highlight"><table><tr><td class="code"><pre><div class="line">&lt;jsp:useBean id="beanName" scope="page|request|session|application"  class="package BeanClass" type="typeName" /&gt;	</div><div class="line">//id：对象实例名称</div><div class="line">//scope：Bean的有效范围,默认page.</div><div class="line">//class：Bean类的名称</div><div class="line">//type：Bean实例类型，可以是本类，或者其父类，或者实现的接口，默认本类。</div><div class="line"></div><div class="line"></div><div class="line">&lt;jsp:useBean...&gt;</div><div class="line">		&lt;jsp:setProperty...&gt;</div><div class="line">		&lt;jsp:getProperty...&gt;</div><div class="line">&lt;/jsp:useBean&gt;</div><div class="line">/*	jsp:setProperty格式:</div><div class="line">	&lt;jsp:setProperty name="beanName"</div><div class="line">	property="propertyName"|property="*"</div><div class="line">	value="property value"|param="paramName"/&gt;</div><div class="line">	*若为上一个页面form提交过来的数据，可以用property="*"。</div><div class="line">		//注：若request传输后输出乱码，可以使用request命令在获取前转码。request.setCharacterEncoding("GBK");</div><div class="line">	*相当于beanName.setPropertyName(value)方法调用(setXxx()方法)。</div><div class="line">	eg:	&lt;jsp:setProperty</div><div class="line">			name="entry"</div><div class="line">			property="itmeID"</div><div class="line">			value="&lt;%=request.getParameter("itmeID")%&gt;"	//等于param="itmeID"</div><div class="line">		/&gt;</div><div class="line">		作用：从request中读取itmeID,调用setItemID方法传入property的itemID</div><div class="line">	</div><div class="line">	</div><div class="line">	jsp:getProperty格式：</div><div class="line">	&lt;jsp:getProperty name="beanName"/&gt;</div><div class="line">	*相当于beanName.getPropertyName()方法调用(getXxx()方法)。</div><div class="line">	*调用原理：反射机制。</div><div class="line">	</div><div class="line">	</div><div class="line">*/</div></pre></td></tr></table></figure>
+</blockquote>
+</li>
+<li><p>注：<br>javaBean尽量放在包中使用，不要使用裸体类。</p>
+<blockquote>
+<p>eg:</p>
+<ul>
+<li>javaBean中定义包：package bean;</li>
+<li>编译后的bean文件放置目录WEB-INF\classes\bean</li>
+<li>jsp中导入&lt;%@ page import=”bean.*” %&gt;</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="jsp-include"><a href="#jsp-include" class="headerlink" title="jsp:include"></a>jsp:include</h3><p>该指令在转换期间不会被编译，只有当客户端请求时期被执行到才会被动态的编译载入</p>
+<ul>
+<li>用法:</li>
+</ul>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:include page=<span class="string">"URLSpec"</span> flush=<span class="string">"true"</span>/&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="code"><pre><div class="line">&lt;jsp:include page="URLSpec" flush="true"&gt;</div><div class="line">	&lt;jsp:param name="ParamName" value="paramValue"/&gt;</div><div class="line">&lt;/jsp:include&gt;</div><div class="line">	//jsp:param:用来设定include对应的参数和值</div></pre></td></tr></table></figure>
+<h3 id="jsp-forward"><a href="#jsp-forward" class="headerlink" title="jsp:forward"></a>jsp:forward</h3><p>用于将一个jsp的内容传递到page所指定的JSP程序或者Servlet中处理（URL）</p>
+<ul>
+<li>用法：</li>
+</ul>
+<blockquote>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:forward page=<span class="string">"urlSpec"</span> flush=<span class="string">"true"</span>/&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">&lt;jsp:forward page=<span class="string">"urlSpec"</span>&gt;</div><div class="line">	&lt;jsp:param name=<span class="string">"paramName"</span> value=<span class="string">"paramValue"</span>/&gt;</div><div class="line">&lt;jsp:forward&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<ul>
+<li>特点：<blockquote>
+<ul>
+<li>执行Forward的页面和forward跳转到的页面用的是同一个request，服务器端直接将请求传递给目标页面。</li>
+<li>与之相对应的是response.sendRedirect，该方法向客户端返回待跳转页面的地址，客户端重新向待跳转页面发起请求。</li>
+<li>Forward可以直接在本URL后添加参数并传递给待跳转页面，response.sendRedirect不能在本URL后添加参数。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="jsp-plugin"><a href="#jsp-plugin" class="headerlink" title="jsp:plugin"></a>jsp:plugin</h3><p>执行一个applet或Bean,有可能的话还要下载一个Java插件用于执行它。</p>
+<hr>
+<h2 id="内置对象"><a href="#内置对象" class="headerlink" title="内置对象"></a>内置对象</h2><h3 id="out"><a href="#out" class="headerlink" title="out"></a>out</h3><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">println():		向客户端输出各种类型数据</div><div class="line">newLine():		输出一个换行符</div><div class="line">close():		关闭输出流</div><div class="line">flush():		输出缓冲区中的数据</div><div class="line">clearBuffer():	清除缓冲区里数据，同时输出到客户端</div><div class="line">clear():		清除缓冲区里数据但不输出到客户端</div><div class="line">getBufferSize():返回缓冲区的大小</div></pre></td></tr></table></figure>
+<h3 id="request"><a href="#request" class="headerlink" title="request"></a>request</h3><p>调用JSP页面的请求。通常request对象是javax.servlet.http.HttpServletRequest接口的一个实例。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">getMethod():					返回客户端向服务器端传送数据的方法。</div><div class="line">getParameter(String paramName):	返回客户端向服务器端传送的参数值，参数由paramName指定。</div><div class="line">getParameterValues(String name):获得客户端传给服务器端的所有参数的名字，结果是枚举类型数据(Enumeration)。</div><div class="line">getRequestURL():				获得发出请求字符串的客户端地址</div><div class="line">getRemoteAddr():				获得客户端的IP地址</div><div class="line">getRemoteHost():				获得客户端机器名称</div><div class="line">getServerName():				获得额服务器的名字</div><div class="line">getServletName():				客户端所请求的脚本文件路径</div><div class="line">getServerPort():				获得服务器端的端口</div></pre></td></tr></table></figure></p>
+<h3 id="response"><a href="#response" class="headerlink" title="response"></a>response</h3><p>返回给客户端的响应，是javax.servlet.http.HttpServletRequest接口的一个实例。<br>常用于设置HTTP标题、添加cookie、设置响应内容的类型和状态、发送HTTP重定向和编码URL。<br><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">addCookie(Cookie cookie):				添加一个Cookie对象，用于在客户端保存特定信息。</div><div class="line">addHeader(String name String value):	添加HTTP头信息，该Header信息将发送到客户端。</div><div class="line">containsHeader(String name):			判断指定名字的HTTP文件头是否存在。</div><div class="line">sendError(<span class="keyword">int</span>):							向客户端发送错误的信息。(错误码)</div><div class="line">sendRedirect(String url):				重定向JSP文件。</div><div class="line">	和&lt;jsp:forward&gt;的区别：</div><div class="line">	sendRedirect通过客户端发起二次申请，不同的request对象</div><div class="line">	jsp:forward是同一个request在服务器内部转发</div><div class="line">setContentType(String contenType):		设置MIME类型和编码方式。</div></pre></td></tr></table></figure></p>
+<h3 id="pageContext"><a href="#pageContext" class="headerlink" title="pageContext"></a>pageContext</h3><h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><h3 id="application"><a href="#application" class="headerlink" title="application"></a>application</h3><h3 id="config"><a href="#config" class="headerlink" title="config"></a>config</h3><figure class="highlight jsp"><table><tr><td class="code"><pre><div class="line">从servlet文件跳转到jsp:</div><div class="line">getServletConfig().getServletContext().getRequestDispatcher(<span class="string">"/目标路径及跳转文件"</span>).forward(request,response)|.include()。</div><div class="line">从jsp跳转到servlet：</div><div class="line">&lt;jsp:forward page=<span class="string">"/目标路径及跳转文件"</span> /&gt;</div></pre></td></tr></table></figure>
+<h3 id="exception"><a href="#exception" class="headerlink" title="exception"></a>exception</h3><h3 id="page-1"><a href="#page-1" class="headerlink" title="page"></a>page</h3>
+                <hr>
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                     style="text-align: right"
+                     data-thread-key="2016/10/14/JSP基础/"
+                     data-title="JSP基础"
+                     data-url="http://jooop.github.io/2016/10/14/JSP基础/"
+                     data-images=""
+                     data-content="JSP基本语法：Declaretion  声明&lt;%! %&gt;    成员变量声明，只... | Jooop&#39;s blog ">
+                    <div class="ds-share-inline">
+                        <ul class="ds-share-icons-16">
+                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                        </ul>
+                        <div class="ds-share-icons-more">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/10/22/MySQL基础知识/" data-toggle="tooltip" data-placement="top"
+                           title="MySQL基础知识">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/10/11/Cookie和Session/" data-toggle="tooltip" data-placement="top"
+                           title="servlet中的cookie和session">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                         data-thread-key="2016/10/14/JSP基础/"
+                         data-title="JSP基础"
+                         data-url="http://jooop.github.io/2016/10/14/JSP基础/">
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col">
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JSP基本语法："><span class="toc-text">JSP基本语法：</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Declaretion-声明"><span class="toc-text">Declaretion  声明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Scriptlet-程序段"><span class="toc-text">Scriptlet  程序段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Expression-表达式"><span class="toc-text">Expression  表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Comment-注释"><span class="toc-text">Comment  注释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Directives-指令（编译期间执行的指令）"><span class="toc-text">Directives 指令（编译期间执行的指令）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常见Directive"><span class="toc-text">常见Directive:</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#page"><span class="toc-text">page:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#include："><span class="toc-text">include：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#taglib"><span class="toc-text">taglib</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Action动作指令（运行期间执行的指令）"><span class="toc-text">Action动作指令（运行期间执行的指令）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#jsp-useBean"><span class="toc-text">jsp:useBean</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#jsp-include"><span class="toc-text">jsp:include</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#jsp-forward"><span class="toc-text">jsp:forward</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#jsp-plugin"><span class="toc-text">jsp:plugin</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内置对象"><span class="toc-text">内置对象</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#out"><span class="toc-text">out</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#request"><span class="toc-text">request</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#response"><span class="toc-text">response</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pageContext"><span class="toc-text">pageContext</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#session"><span class="toc-text">session</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#application"><span class="toc-text">application</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#config"><span class="toc-text">config</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exception"><span class="toc-text">exception</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#page-1"><span class="toc-text">page</span></a></li></ol></li></ol></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5 class="text-center">
+                        <a href="/tags/">FEATURED TAGS</a>
+                    </h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#J2EE"
+                           title="J2EE">J2EE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'jooop';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user};
+    (function () {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';
+        ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Jooop 2017
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    Theme by <a href="https://haojen.github.io/">Haojen Ma</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://jooop.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-84260933-1';
+    var _gaDomain = 'jooop.github.io';
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="http://odl4eqqu9.bkt.clouddn.com/ava/ava_cat.PNG">
+</body>
+
+</html>

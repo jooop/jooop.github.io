@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一个个人博客">
+    <meta name="keyword" content="null">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+	<meta name="google-site-verification" content="c7x8WiOE15RKbJLbCTaZMGqjKzoUdfpyVmrmJ8nTq8M" />
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="Jooop" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        MySQL基础知识｜Jooop&#39;s blog
+        
+    </title>
+
+    <link rel="canonical" href="http://jooop.github.io/2016/10/22/MySQL基础知识/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('//odl4eqqu9.bkt.clouddn.com/bg/44307-105.jpg')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    Jooop
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/tags/">tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+
+<!--only post-->
+
+
+<img class="wechat-title-img"
+     src="http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg">
+
+
+<style>
+    
+    header.intro-header {
+        background-image: url('http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg')
+    }
+
+    
+</style>
+
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>MySQL基础知识</h1>
+                    
+                    <h2 class="subheading">对MySQL基础内容的整理，包括配置及遇到的问题，SQL基本操作语句。</h2>
+                    
+                    <span class="meta">
+                         作者 jooop
+                        <span>
+                          日期 2016-10-22
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#MySQL"
+                           title="MySQL">MySQL</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            MySQL基础知识
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+                <h1 id="MySQL基本配置及问题"><a href="#MySQL基本配置及问题" class="headerlink" title="MySQL基本配置及问题"></a>MySQL基本配置及问题</h1><h2 id="一、MySQL配置"><a href="#一、MySQL配置" class="headerlink" title="一、MySQL配置"></a>一、MySQL配置</h2><p>1.<a href="http://dev.mysql.com/downloads/mysql/" target="_blank" rel="external">下载</a>解压<br>2.将mysql目录下bin设置到Path<br>3.在mysql目录下新建文本文档，改名为<code>my.ini</code>，按照下面内容配置my.ini<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">[client]</div><div class="line">default-character-set=utf8</div><div class="line"></div><div class="line">[mysqld]</div><div class="line">character-set-server=utf8 </div><div class="line">collation-server=utf8_general_ci </div><div class="line">basedir=&quot;D:\mysql-5.7.16-winx64&quot;</div><div class="line">datadir=&quot;D:\mysql-5.7.16-winx64\data&quot;</div><div class="line"></div><div class="line">port=3306</div><div class="line"></div><div class="line">server_id=1</div><div class="line"></div><div class="line">[WinMySQLadmin]</div><div class="line">Server=D:\mysql-5.7.16-winx64\bin\mysqld.exe</div></pre></td></tr></table></figure></p>
+<ul>
+<li><p><strong>其中:</strong><br>以下内容改为自己的mysql放置目录。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">basedir=&quot;D:\mysql-5.7.16-winx64&quot;</div><div class="line">datadir=&quot;D:\mysql-5.7.16-winx64\data&quot;</div><div class="line">Server=D:\mysql-5.7.16-winx64\bin\mysqld.exe</div></pre></td></tr></table></figure>
+</li>
+<li><p><strong>注：</strong>使用其他编辑器编写该文件时使用UTF-8无BOM格式编码。不然后面命令会报错Found option without preceding group in config file。</p>
+</li>
+</ul>
+<p>4.安装MySQL服务:打开cmd命令提示符, 执行命令:<code>mysqld --install</code>安装服务,提示”Service successfully installed.”表示成功;</p>
+<p>5.执行<code>mysqld.exe --initialize</code> 命令,创建data</p>
+<p>6.启动:<code>net start MySQL</code></p>
+<p>7.卸载方法：<br>(1). <code>sc delete MySQL</code>卸载服务<br>(2). 清除path下的文件路径<br>(3). 清除注册表文件。</p>
+<h2 id="二、登陆MySQL"><a href="#二、登陆MySQL" class="headerlink" title="二、登陆MySQL"></a>二、登陆MySQL</h2><figure class="highlight"><table><tr><td class="code"><pre><div class="line">mysql -u root -p</div><div class="line">--提示输入密码，初始默认为空，进入后可以修改密码</div><div class="line">mysql&gt;set password =password('你的密码');</div><div class="line">mysql&gt;flush privileges;</div></pre></td></tr></table></figure>
+<h2 id="三、解决MySQL-5-7密码忘记"><a href="#三、解决MySQL-5-7密码忘记" class="headerlink" title="三、解决MySQL 5.7密码忘记"></a>三、解决MySQL 5.7密码忘记</h2><ol>
+<li>在任务管理器中结束mysqld.exe进程，确保mysql服务器端已结束运行。</li>
+<li>打开cmd命令提示符，进入mysql.exe所在的文件夹(例如：D:\mysql-5.7.16-winx64\bin)</li>
+<li>输入命令  <code>mysqld --skip-grant-tables</code> 回车，此时就跳过了mysql的用户验证。</li>
+<li>此时该窗口命令行无法操作，打开一个新的命令行,直接输入mysql，不需要带任何登录参数直接回车登陆上数据库。</li>
+<li>输入<code>show databases;</code>可以看到所有数据库说明成功登陆.</li>
+<li>输入 <code>use mysql;</code>选择mysql数据库。</li>
+<li>输入<code>update MySQL.user set authentication_string=password(&#39;root&#39;) where user=&#39;root&#39; ;</code>修改密码。</li>
+<li>重新打开dos再次登陆后若提示ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.<br>输入命令，重新设置密码即可解决。<code>SET PASSWORD = PASSWORD(&#39;123456&#39;);</code> </li>
+</ol>
+<hr>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="一、对数据库的操作"><a href="#一、对数据库的操作" class="headerlink" title="一、对数据库的操作"></a>一、对数据库的操作</h2><h3 id="1-增删查改数据库"><a href="#1-增删查改数据库" class="headerlink" title="1.增删查改数据库"></a>1.增删查改数据库</h3><figure class="highlight"><table><tr><td class="code"><pre><div class="line">--1.查看所有的数据库</div><div class="line">mysql&gt; show databases;</div><div class="line"></div><div class="line"></div><div class="line">--2.查看当前使用的哪个数据库，如下为null的话表示没有使用。</div><div class="line">-mysql&gt; select database(); </div><div class="line">+------------+</div><div class="line">| database() |</div><div class="line">+------------+</div><div class="line">| NULL       |</div><div class="line">+------------+</div><div class="line"></div><div class="line"></div><div class="line">--3.创建名为mydb的数据库</div><div class="line">mysql&gt; create database mydb;	</div><div class="line"></div><div class="line"></div><div class="line">--4.查看mydb的编码格式。（默认编码格式在my.ini文件中配置，此处默认配置编码为utf-8）</div><div class="line">mysql&gt; show create database mydb;	</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line">| Database | Create Database                                               |</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line">| mydb     | CREATE DATABASE `mydb` /*!40100 DEFAULT CHARACTER SET utf8 */ |</div><div class="line">+----------+---------------------------------------------------------------+</div><div class="line"></div><div class="line"></div><div class="line">--5.选择使用mydb数据库</div><div class="line">mysql&gt; use mydb;</div><div class="line">Database changed</div><div class="line"></div><div class="line"></div><div class="line">--6.查看当前的数据库包含什么表</div><div class="line">mysql&gt; SHOW TABLES;	</div><div class="line"></div><div class="line"></div><div class="line">--7.删除数据库mydb</div><div class="line">mysql&gt; drop database mydb;</div></pre></td></tr></table></figure>
+<h3 id="2-备份与恢复数据库"><a href="#2-备份与恢复数据库" class="headerlink" title="2.备份与恢复数据库"></a>2.备份与恢复数据库</h3><p><strong>注：</strong><br>备份操作需要在dos命令行下执行。<br>恢复操作需要在mysql控制台操作。<br><figure class="highlight"><table><tr><td class="code"><pre><div class="line">--1.备份数据库</div><div class="line">--新打开一个dos窗口，不要登录数据库</div><div class="line">--（下面命令为将mydb数据库备份到D盘mydb1.sql中）</div><div class="line">mysqldump -u root -p mydb &gt; D:/mydb1.sql</div><div class="line"></div><div class="line"></div><div class="line">--2.恢复数据库</div><div class="line">--进到mysql控制台，创建一个新的空的数据库，使用它，进行回复操作</div><div class="line">--（下面命令为新建mydb2数据库，选择使用mydb2，将d盘下mydb1.sql中文件恢复至mydb2中）</div><div class="line">mysql&gt; create database mydb2;</div><div class="line">mysql&gt; use mydb2;</div><div class="line">mysql&gt; source d:/mydb1.sql</div></pre></td></tr></table></figure></p>
+<h3 id="mysql显示中文乱码问题："><a href="#mysql显示中文乱码问题：" class="headerlink" title="mysql显示中文乱码问题："></a>mysql显示中文乱码问题：</h3><ol>
+<li><code>show variables like &#39;char%&#39;;</code>查看字符编码集。</li>
+<li>若都为utf8，查看当前控制台字符集格式（win下dos一般为GBK）。</li>
+<li>设置返回字符集格式为utf8<code>set character_set_results=gbk;</code>。</li>
+</ol>
+<h2 id="二、对表的操作"><a href="#二、对表的操作" class="headerlink" title="二、对表的操作"></a>二、对表的操作</h2><h3 id="1-创建表"><a href="#1-创建表" class="headerlink" title="1.创建表"></a>1.创建表</h3><figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> 表名(</div><div class="line">列名 列的数据类型,</div><div class="line">......</div><div class="line">)<span class="built_in">character</span> <span class="keyword">set</span> 字符集名称 //不写默认按数据库字符集类型</div><div class="line"></div><div class="line"><span class="comment">--eg:</span></div><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">users</span>(</div><div class="line"><span class="keyword">id</span> <span class="built_in">int</span>,</div><div class="line"><span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">64</span>),</div><div class="line">pwd <span class="built_in">varchar</span>(<span class="number">64</span>),</div><div class="line">birthday <span class="built_in">date</span>);</div></pre></td></tr></table></figure>
+<hr>
+<h3 id="2-修改表结构"><a href="#2-修改表结构" class="headerlink" title="2.修改表结构"></a>2.修改表结构</h3><figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="comment">--查看数据表的结构</span></div><div class="line">desc 表名;</div><div class="line"><span class="comment">--或者</span></div><div class="line"><span class="keyword">show</span> <span class="keyword">columns</span> <span class="keyword">from</span> 表名;</div><div class="line"></div><div class="line"><span class="comment">--添加新的列</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">add</span> 列名 数据类型</div><div class="line"></div><div class="line"><span class="comment">--修改列的类型和大小</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">modify</span> 列名 新的数据类型</div><div class="line"></div><div class="line"><span class="comment">--修改列名、类型和大小</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">change</span> <span class="keyword">column</span> 原列名 新列名 新的数据类型;</div><div class="line"></div><div class="line"><span class="comment">--删除某列</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="keyword">drop</span>  列名</div><div class="line"></div><div class="line"><span class="comment">--修改表名</span></div><div class="line"><span class="keyword">rename</span> <span class="keyword">table</span> 原表名 <span class="keyword">to</span> 新表名</div><div class="line"></div><div class="line"><span class="comment">--修改表的字符集</span></div><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> 表名 <span class="built_in">character</span> <span class="keyword">set</span> 字符集名;</div><div class="line"></div><div class="line"><span class="comment">--查看创建表时所用的指令</span></div><div class="line"><span class="keyword">show</span> <span class="keyword">create</span> <span class="keyword">table</span> 表名</div></pre></td></tr></table></figure>
+<h3 id="desc表时key栏的解释"><a href="#desc表时key栏的解释" class="headerlink" title="desc表时key栏的解释"></a>desc表时key栏的解释</h3><blockquote>
+<p>使用MySQL数据库desc 表名时，我们看到Key那一栏，可能会有4种值，即 ‘ ‘，’PRI’，’UNI’，’MUL’。</p>
+<ul>
+<li>如果Key是空的，那么该列值的可以重复，表示该列没有索引，或者是一个非唯一的复合索引的非前导列；</li>
+<li>如果Key是PRI，那么该列是主键的组成部分；</li>
+<li>如果Key是UNI，那么该列是一个唯一值索引的第一列（前导列），并别不能含有空值（NULL）；</li>
+<li>如果Key是MUL，那么该列的值可以重复，该列是一个非唯一索引的前导列（第一列）或者是一个唯一性索引的组成部分但是可以含有空值NULL。</li>
+<li>如果对于一个列的定义，同时满足上述4种情况的多种，比如一个列既是PRI，又是UNI，那么”desc 表名”的时候，显示的Key值按照优先级来显示 PRI-&gt;UNI-&gt;MUL。那么此时，显示PRI。</li>
+<li>一个唯一性索引列可以显示为PRI，并且该列不能含有空值，同时该表没有主键。</li>
+<li>一个唯一性索引列可以显示为MUL，如果多列构成了一个唯一性复合索引，因为虽然索引的多列组合是唯一的，比如ID+NAME是唯一的，但是没一个单独的列依然可以有重复的值，只要ID+NAME是唯一的即可。</li>
+</ul>
+</blockquote>
+<h2 id="三、CRUD语句"><a href="#三、CRUD语句" class="headerlink" title="三、CRUD语句"></a>三、CRUD语句</h2><h3 id="1-Insert"><a href="#1-Insert" class="headerlink" title="1.Insert"></a>1.Insert</h3><p><code>insert into 表名 (列名.....) values (值....);</code></p>
+<ul>
+<li>插入的数据应与字段的数据类型相同。</li>
+<li>数据的大小应在列的规定范围内，例如：不能将一个长度为80的字符串加入到长度为40的列中。</li>
+<li>字符和日期型数据应包含在单引号中。</li>
+<li>插入空值，不指定或insert into table value(null)</li>
+<li><p>在values中列出的数据位置必须与被加入的列的排列位置相对应。<br>eg:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">test</span> (<span class="keyword">id</span> <span class="built_in">int</span> ,<span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">64</span>));</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">test</span> (<span class="keyword">id</span>,<span class="keyword">name</span>) <span class="keyword">values</span>(<span class="number">3</span>,’aaa’);</div><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">test</span> (<span class="keyword">name</span>,<span class="keyword">id</span>) <span class="keyword">values</span>(’aaa’,<span class="number">3</span>);</div></pre></td></tr></table></figure>
+</li>
+<li><p><strong>若values全部对应写出，则可省略列名。</strong></p>
+</li>
+</ul>
+<h3 id="2-Update"><a href="#2-Update" class="headerlink" title="2.Update"></a>2.Update</h3><p><code>update 表名 set 列名=表达式 ... where 条件</code></p>
+<ul>
+<li>UPDATE语法可以用新值更新原有表行中的各列。</li>
+<li>SET子句指示要修改哪些列和要给予哪些值。</li>
+<li>WHERE子句指定应更新哪些行。如没有WHERE子句，则更新所有的行。</li>
+</ul>
+<h3 id="3-Delete"><a href="#3-Delete" class="headerlink" title="3.Delete"></a>3.Delete</h3><p><code>delele from 表名 where 条件;</code></p>
+<ul>
+<li>若不使用where子句，将删除表中所有数据。<br>所有要小心使用.</li>
+<li>Delete语句不能删除某一列的值（可使用update）</li>
+<li>使用delete语句仅删除记录，不删除表本身。如要删除表，使用drop table语句。</li>
+<li>同insert和update一样，从一个表中删除记录将引起其它表的参照完整性问题，在修改数据库数据时，头脑中应该始终不要忘记这个潜在的问题。</li>
+<li>删除表中数据也可使用TRUNCATE TABLE 语句，它和delete有所不同，truncate table 表名，可以删除表的记录，速度快，但不能回滚。</li>
+</ul>
+<h3 id="mysql中事务的特殊说明"><a href="#mysql中事务的特殊说明" class="headerlink" title="mysql中事务的特殊说明:"></a>mysql中事务的特殊说明:</h3><p>(1).  mysql 控制台是默认自动提交事务(dml)<br>(2). 要在控制台使用事务应:<br><code>set autocommit=false;</code><br><code>savepoint 保存点</code><br>//操作…<br><code>rollback to 保存点</code></p>
+<h3 id="4-Select"><a href="#4-Select" class="headerlink" title="4.Select"></a>4.Select</h3><p><code>select [distinct] 列名....（可运算） from 表名 where 条件;</code></p>
+<ul>
+<li>Select 指定查询哪些列的数据。</li>
+<li>column指定列名。</li>
+<li><em>号代表查询所有列。<br>`select </em> from 表名;`</li>
+<li>From指定查询哪张表。</li>
+<li>DISTINCT可选，指显示结果时，是否剔除重复数据<br><code>select distinct 列名 from 表名</code></li>
+<li>列可参与运算<br><code>select 列名1+列名2+... from 表名 whrer 条件</code></li>
+<li>列名可用as显示别名<br><code>select 列名 as &#39;别名&#39; from 表名 where 条件</code></li>
+</ul>
+<h4 id="1-where子句中常用的运算符"><a href="#1-where子句中常用的运算符" class="headerlink" title="(1).where子句中常用的运算符"></a>(1).where子句中常用的运算符</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_where1.png" alt="enter image description here"></p>
+<h4 id="2-order-by-子句"><a href="#2-order-by-子句" class="headerlink" title="(2).order by 子句"></a>(2).order by 子句</h4><p><code>select 列名1+列名2+... as &#39;别名&#39; from 表名 where 条件 order by &#39;别名&#39; desc;</code><br>对查询结果排序<br>最后加：<br>asc升序（默认）<br>desc降序</p>
+<h4 id="分页查找："><a href="#分页查找：" class="headerlink" title="分页查找："></a>分页查找：</h4><p><code>select * from 表名 where 条件 limit 起始行 输出行数</code></p>
+<ul>
+<li>起始行从0开始计算。</li>
+<li>输出行数表示从起始行开始输出多少行的数据。</li>
+</ul>
+<h3 id="5-其他函数"><a href="#5-其他函数" class="headerlink" title="5.其他函数"></a>5.其他函数</h3><h4 id="1-count"><a href="#1-count" class="headerlink" title="(1).count"></a>(1).count</h4><p><code>select count(*)|count(列名) from 表名 where 条件;</code><br>返回满足条件的某一列（行）的总数</p>
+<h4 id="2-sum"><a href="#2-sum" class="headerlink" title="(2).sum"></a>(2).sum</h4><p><code>select sum(列名){,sum列名} from 表名 where 条件;</code><br>对满足条件列的数值求和，返回该列中各行的数值的总和</p>
+<ul>
+<li>sum仅对数值列有效</li>
+<li>对多列求和不能缺少“,”，eg:<code>select sum(列名),sum(列名),sum(列名) from 表名;</code></li>
+<li>对多个列求总和，eg:<code>select sum(列名1+列名2+...) from 表名;</code></li>
+</ul>
+<h4 id="3-avg"><a href="#3-avg" class="headerlink" title="(3).avg"></a>(3).avg</h4><p><code>select avg(列名){,avg列名} from 表名 where 条件;</code><br>返回满足where条件的一列的平均值</p>
+<ul>
+<li>条件、用法同sum。</li>
+<li>若某一行数值为“null”，则该行不参与平均；若为“0”则参与平均</li>
+</ul>
+<h4 id="4-max-min"><a href="#4-max-min" class="headerlink" title="(4).max/min"></a>(4).max/min</h4><p><code>select max(列名) from 表名 where 条件;</code><br>返回满足where条件的一列的最大值</p>
+<h4 id="5-group-by"><a href="#5-group-by" class="headerlink" title="(5).group by"></a>(5).group by</h4><p><code>select 列名 from 表名 group by 待分组列名</code><br>对group by子句中的列进行分组</p>
+<h4 id="6-having"><a href="#6-having" class="headerlink" title="(6).having"></a>(6).having</h4><p><code>select 列名 from 表名 group by 待分组列名 having 条件</code></p>
+<ul>
+<li>having和where均可实现过滤，但having和以使用合计函数，通常跟在group by后，作用于组。</li>
+<li>顺序：group by ……having……order by……</li>
+</ul>
+<h4 id="7-日期和时间函数"><a href="#7-日期和时间函数" class="headerlink" title="(7).日期和时间函数"></a>(7).日期和时间函数</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_date_time.PNG" alt="enter image description here"></p>
+<p><code>select current_date() from dual;</code>//得到当前日期<br><code>select date(now()) from dual</code>//得到当前日<br><code>select * from 表名 where date_add(日期数据的列名, interval 2 hour) &gt;= now()</code>//得到日期数据的列名下，距今两个小时内的数据</p>
+<ul>
+<li>where date_add(日期/date/datetime/timestamp, interval 数字 <strong>type</strong>)<br>type类型可以是：<code>microsecond;second;minute;hour;day;week;month;quarter;year</code></li>
+</ul>
+<h4 id="8-字符串函数"><a href="#8-字符串函数" class="headerlink" title="(8).字符串函数"></a>(8).字符串函数</h4><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_string_hanshu.PNG" alt="enter image description here"><br><code>select charset(列名) from 表名</code>//查看某列所用的字符集格式</p>
+<hr>
+<h2 id="四、定义表的约束"><a href="#四、定义表的约束" class="headerlink" title="四、定义表的约束"></a>四、定义表的约束</h2><h3 id="1、主键约束"><a href="#1、主键约束" class="headerlink" title="1、主键约束"></a>1、主键约束</h3><p><strong>primary key：</strong></p>
+<ul>
+<li>主键：用于唯一标识一条记录的约束，一张表最多只能有一个主键，不能为null，不允许为空，不允*许重复。</li>
+<li>用法：创建表时写在要设为主键的列的定义后，不需要分隔符。</li>
+<li>删除主键：<code>alter table tablename drop primary key;</code></li>
+</ul>
+<h3 id="2、主键自动增长"><a href="#2、主键自动增长" class="headerlink" title="2、主键自动增长"></a>2、主键自动增长</h3><p><strong>auto_increment</strong></p>
+<ul>
+<li>用法：同上。</li>
+</ul>
+<h3 id="3、唯一约束"><a href="#3、唯一约束" class="headerlink" title="3、唯一约束"></a>3、唯一约束</h3><p><strong>unique</strong> </p>
+<ul>
+<li>表的某列的值不能重复，可以为null(null可重复)，表中可以有多个unique。</li>
+</ul>
+<h3 id="4、非空约束"><a href="#4、非空约束" class="headerlink" title="4、非空约束"></a>4、非空约束</h3><p><strong>not null</strong></p>
+<ul>
+<li>MySQL中列的值默认可以为空，若不允许其为空则需not null说明</li>
+</ul>
+<h3 id="5、外键约束"><a href="#5、外键约束" class="headerlink" title="5、外键约束"></a>5、外键约束</h3><p><strong>foreign key</strong></p>
+<ul>
+<li>先建主表，在建从表</li>
+<li>用法：<ul>
+<li>在创建从表时，定义：<br><code>constraint 外键名称 foreign key(从表的外键列名) references 主表名(从表要指向的列)</code></li>
+<li>从表只能指向主表的主键列或者unique。</li>
+<li>外键列的数据类型和主表列的数据类型要一样。</li>
+<li>外键的值要么为null；要么需要在主表列中存在。</li>
+<li>外键可以指向本表的主键/unique列。</li>
+<li>外键名前缀：fk<em>，主键名前缀：pk</em></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="MySQL的数据类型"><a href="#MySQL的数据类型" class="headerlink" title="MySQL的数据类型"></a>MySQL的数据类型</h1><h2 id="一、数值型"><a href="#一、数值型" class="headerlink" title="一、数值型"></a>一、数值型</h2><h3 id="1-bit-m"><a href="#1-bit-m" class="headerlink" title="1.bit(m)"></a>1.bit(m)</h3><p>m默认为 1 最大 64</p>
+<h3 id="2-tinyint-unsigned"><a href="#2-tinyint-unsigned" class="headerlink" title="2.tinyint [unsigned]"></a>2.tinyint [unsigned]</h3><p>如果是有符号则表示 -128 到 127 ，如果是无符号 0-255<br><strong>eg:</strong><br>create table test3(num tinyint) – -128 到  127<br>create table test4(num tinyint unsigned)  0 — 255  </p>
+<h3 id="3-smallint"><a href="#3-smallint" class="headerlink" title="3.smallint"></a>3.smallint</h3><p>samllint 是两个字节表示的.<br>带符号是  负的2的15次方 到 2的15次方-1 ,无符号 2的16方  -1</p>
+<h3 id="4-其它的数值类型"><a href="#4-其它的数值类型" class="headerlink" title="4.其它的数值类型"></a>4.其它的数值类型</h3><p><img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_shuju.png" alt="enter image description here"></p>
+<h3 id="5-float"><a href="#5-float" class="headerlink" title="5.float"></a>5.float</h3><p>FLOAT[(M,D)] [UNSIGNED]  是定长<br>m:表示有效位。d:表示小数点有几位。<br><strong>eg:</strong><br>create table test5( num float);<br>create table test6(num float(5,1));</p>
+<h3 id="6-double"><a href="#6-double" class="headerlink" title="6.double"></a>6.double</h3><p>其用法和float 类似，只是表示的范围更大,也是定长</p>
+<h3 id="7-numeric-m-d"><a href="#7-numeric-m-d" class="headerlink" title="7.numeric(m,d)"></a>7.numeric(m,d)</h3><p>用于表示小数，或者整数<br><strong>eg:</strong><br>create table test7 (num numeric); //这样其实就是可以存放整数.<br>create table test8 (num numeric(5,2));//这样就可以表示 有效为5,小数点有两位的数</p>
+<h2 id="二、字符串型"><a href="#二、字符串型" class="headerlink" title="二、字符串型"></a>二、字符串型</h2><h3 id="一览图"><a href="#一览图" class="headerlink" title="一览图:"></a>一览图:</h3><p> <img src="http://odl4eqqu9.bkt.clouddn.com/mysql/mysql_zifu.png" alt="enter image description here"></p>
+<h3 id="常用的有"><a href="#常用的有" class="headerlink" title="常用的有"></a>常用的有</h3><h3 id="1-char-m"><a href="#1-char-m" class="headerlink" title="1.char(m)"></a>1.char(m)</h3><p>m 范围是 0-255, 定长.<br>char(10) 若存放 ‘abc’ 字串，实际在表示  ‘abc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;’;<br><strong>eg:</strong><br>create table test11 (name char(20));</p>
+<h3 id="2-varchar-m"><a href="#2-varchar-m" class="headerlink" title="2.varchar(m)"></a>2.varchar(m)</h3><p>m 表示大小 ,范围 0-65535， 变长<br>varchar(20) 若存放 ‘abc’ 字串，实际在表示 ‘abc’;<br><strong>建议:</strong><br>若表的某列长度固定，比如 产品编号..学号. .. 而且在 255内，应当使用char<br>若长度不能取得，或者长度 大于255 小于 65535 则使用varchar</p>
+<h3 id="3-text"><a href="#3-text" class="headerlink" title="3.text"></a>3.text</h3><p>该类型可以表示更大的字串.</p>
+<h2 id="三、日期类型"><a href="#三、日期类型" class="headerlink" title="三、日期类型"></a>三、日期类型</h2><h3 id="1-date"><a href="#1-date" class="headerlink" title="1.date"></a>1.date</h3><p>日期 (年-月-日)<br>create table test12(birthday date);<br>对于date 只保存 年-月-日</p>
+<h3 id="2-datetime"><a href="#2-datetime" class="headerlink" title="2.datetime"></a>2.datetime</h3><p>日期时间类型<br>create table test13(hiredate datetime);</p>
+<h3 id="3-timestamp"><a href="#3-timestamp" class="headerlink" title="3.timestamp"></a>3.timestamp</h3><p>邮戳： 该类型可以保存 年-月-日 : 时:分:秒<br>和datetime 最大的区别:当 update 某条记录的时候，该列值自动更新<br>create table test14 (name varchar(64) , sal float, hiredate1 timestamp, hiredate2 datetime);</p>
+<hr>
+<h1 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h1><p><a href="http://c.biancheng.net/cpp/html/1450.html" target="_blank" rel="external">Mysql命令desc：获取数据表结构</a><br><a href="http://www.cnblogs.com/mr-wid/archive/2013/05/09/3068229.html#d9" target="_blank" rel="external">21分钟 MySQL 入门教程</a><br>韩顺平MySQL视频讲解</p>
+
+                <hr>
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                     style="text-align: right"
+                     data-thread-key="2016/10/22/MySQL基础知识/"
+                     data-title="MySQL基础知识"
+                     data-url="http://jooop.github.io/2016/10/22/MySQL基础知识/"
+                     data-images=""
+                     data-content="MySQL基本配置及问题一、MySQL配置1.下载解压2.将mysql目录下bin设置到Pat... | Jooop&#39;s blog ">
+                    <div class="ds-share-inline">
+                        <ul class="ds-share-icons-16">
+                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                        </ul>
+                        <div class="ds-share-icons-more">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/01/29/阿里云配置java-web环境/" data-toggle="tooltip" data-placement="top"
+                           title="阿里云配置java web环境">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/10/14/JSP基础/" data-toggle="tooltip" data-placement="top"
+                           title="JSP基础">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                         data-thread-key="2016/10/22/MySQL基础知识/"
+                         data-title="MySQL基础知识"
+                         data-url="http://jooop.github.io/2016/10/22/MySQL基础知识/">
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col">
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL基本配置及问题"><span class="toc-text">MySQL基本配置及问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、MySQL配置"><span class="toc-text">一、MySQL配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、登陆MySQL"><span class="toc-text">二、登陆MySQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、解决MySQL-5-7密码忘记"><span class="toc-text">三、解决MySQL 5.7密码忘记</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、对数据库的操作"><span class="toc-text">一、对数据库的操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-增删查改数据库"><span class="toc-text">1.增删查改数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-备份与恢复数据库"><span class="toc-text">2.备份与恢复数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql显示中文乱码问题："><span class="toc-text">mysql显示中文乱码问题：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、对表的操作"><span class="toc-text">二、对表的操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-创建表"><span class="toc-text">1.创建表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-修改表结构"><span class="toc-text">2.修改表结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#desc表时key栏的解释"><span class="toc-text">desc表时key栏的解释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、CRUD语句"><span class="toc-text">三、CRUD语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Insert"><span class="toc-text">1.Insert</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Update"><span class="toc-text">2.Update</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Delete"><span class="toc-text">3.Delete</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql中事务的特殊说明"><span class="toc-text">mysql中事务的特殊说明:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Select"><span class="toc-text">4.Select</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-where子句中常用的运算符"><span class="toc-text">(1).where子句中常用的运算符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-order-by-子句"><span class="toc-text">(2).order by 子句</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分页查找："><span class="toc-text">分页查找：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-其他函数"><span class="toc-text">5.其他函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-count"><span class="toc-text">(1).count</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-sum"><span class="toc-text">(2).sum</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-avg"><span class="toc-text">(3).avg</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-max-min"><span class="toc-text">(4).max/min</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-group-by"><span class="toc-text">(5).group by</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-having"><span class="toc-text">(6).having</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-日期和时间函数"><span class="toc-text">(7).日期和时间函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-字符串函数"><span class="toc-text">(8).字符串函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四、定义表的约束"><span class="toc-text">四、定义表的约束</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、主键约束"><span class="toc-text">1、主键约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、主键自动增长"><span class="toc-text">2、主键自动增长</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、唯一约束"><span class="toc-text">3、唯一约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4、非空约束"><span class="toc-text">4、非空约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5、外键约束"><span class="toc-text">5、外键约束</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL的数据类型"><span class="toc-text">MySQL的数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、数值型"><span class="toc-text">一、数值型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-bit-m"><span class="toc-text">1.bit(m)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-tinyint-unsigned"><span class="toc-text">2.tinyint [unsigned]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-smallint"><span class="toc-text">3.smallint</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-其它的数值类型"><span class="toc-text">4.其它的数值类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-float"><span class="toc-text">5.float</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-double"><span class="toc-text">6.double</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-numeric-m-d"><span class="toc-text">7.numeric(m,d)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、字符串型"><span class="toc-text">二、字符串型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一览图"><span class="toc-text">一览图:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常用的有"><span class="toc-text">常用的有</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-char-m"><span class="toc-text">1.char(m)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-varchar-m"><span class="toc-text">2.varchar(m)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-text"><span class="toc-text">3.text</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、日期类型"><span class="toc-text">三、日期类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-date"><span class="toc-text">1.date</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-datetime"><span class="toc-text">2.datetime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-timestamp"><span class="toc-text">3.timestamp</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考文章："><span class="toc-text">参考文章：</span></a></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5 class="text-center">
+                        <a href="/tags/">FEATURED TAGS</a>
+                    </h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#MySQL"
+                           title="MySQL">MySQL</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'jooop';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user};
+    (function () {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';
+        ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Jooop 2017
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    Theme by <a href="https://haojen.github.io/">Haojen Ma</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://jooop.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-84260933-1';
+    var _gaDomain = 'jooop.github.io';
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="http://odl4eqqu9.bkt.clouddn.com/ava/ava_cat.PNG">
+</body>
+
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一个个人博客">
+    <meta name="keyword" content="null">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+	<meta name="google-site-verification" content="c7x8WiOE15RKbJLbCTaZMGqjKzoUdfpyVmrmJ8nTq8M" />
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="Jooop" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        从ArrayList源码探究迭代时修改集合内容会抛出异常的原因｜Jooop&#39;s blog
+        
+    </title>
+
+    <link rel="canonical" href="http://jooop.github.io/2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('//odl4eqqu9.bkt.clouddn.com/bg/44307-105.jpg')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    Jooop
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/tags/">tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+
+<!--only post-->
+
+
+<img class="wechat-title-img"
+     src="http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg">
+
+
+<style>
+    
+    header.intro-header {
+        background-image: url('http://odl4eqqu9.bkt.clouddn.com/bg/tags.jpg')
+    }
+
+    
+</style>
+
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>从ArrayList源码探究迭代时修改集合内容会抛出异常的原因</h1>
+                    
+                    <h2 class="subheading">剖析为什么不能在遍历集合时对集合对象本身修改，以及ConcurrentModificationException异常的产生原因</h2>
+                    
+                    <span class="meta">
+                         作者 jooop
+                        <span>
+                          日期 2017-03-16
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#J2SE"
+                           title="J2SE">J2SE</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            从ArrayList源码探究迭代时修改集合内容会抛出异常的原因
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+                <h1 id="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"><a href="#从ArrayList源码探究迭代时修改集合内容会抛出异常的原因" class="headerlink" title="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"></a>从ArrayList源码探究迭代时修改集合内容会抛出异常的原因</h1><h2 id="ConcurrentModificationException异常的产生："><a href="#ConcurrentModificationException异常的产生：" class="headerlink" title="ConcurrentModificationException异常的产生："></a>ConcurrentModificationException异常的产生：</h2><p>在阅读《阿里巴巴 JAVA 开发手册 》一文时，其中有这样一条描述：</p>
+<ul>
+<li><code>7. 【强制】不要在 foreach 循环里进行元素的 remove/add 操作。remove 元素请使用 Iterator 方式，如果并发操作，需要对 Iterator 对象加锁。</code></li>
+<li><p><code>反例：</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   <span class="keyword">for</span> (String temp:a)&#123;</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p><code>说明：这个例子的执行结果会出乎大家的意料，那么试一下把“1”换成“2”，会是同样的结果吗？</code></p>
+</li>
+<li><code>正例：</code><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Iterator&lt;String&gt; it = a.iterator();</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">           it.remove();</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>对上面描述的foreach循环方法中，将<code>&quot;1&quot;改成&quot;2&quot;</code>之后，报错如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">java.util.ConcurrentModificationException</div><div class="line">	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:<span class="number">901</span>)</div><div class="line">	at java.util.ArrayList$Itr.next(ArrayList.java:<span class="number">851</span>)</div></pre></td></tr></table></figure></p>
+<h2 id="同样的问题："><a href="#同样的问题：" class="headerlink" title="同样的问题："></a>同样的问题：</h2><p>另外根据<code>集合对象的for增强即为iterator方式循环的简化</code>的原理，将正例的iterator方式循环中<code>it.remove()</code>改为<code>a.remove(temp);</code>也会有同样的报错。<br>例如：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">	Iterator&lt;String&gt; it = a.iterator();</div><div class="line">    <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">        String temp = it.next();</div><div class="line">        <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">            a.remove(temp); <span class="comment">//注意此处</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">运行结果:</div><div class="line">	java.util.ConcurrentModificationException</div><div class="line">	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:<span class="number">901</span>)</div><div class="line">	at java.util.ArrayList$Itr.next(ArrayList.java:<span class="number">851</span>)</div><div class="line">	异常定位到该方法中的String temp = it.next();</div></pre></td></tr></table></figure></p>
+<h2 id="从源码解释异常的原因"><a href="#从源码解释异常的原因" class="headerlink" title="从源码解释异常的原因"></a>从源码解释异常的原因</h2><p>根据异常信息抛出的位置为<code>String temp = it.next();</code>，可定位异常是由迭代器中的方法抛出的。<br>查看ArrayList的源码，提取出重点信息如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;</div><div class="line"></div><div class="line">	<span class="keyword">protected</span> <span class="keyword">transient</span> <span class="keyword">int</span> modCount = <span class="number">0</span>;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">trimToSize</span><span class="params">()</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">ensureExplicitCapacity</span><span class="params">(<span class="keyword">int</span> minCapacity)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span> </span>&#123;</div><div class="line">        ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</div><div class="line">        ensureCapacityInternal(size + <span class="number">1</span>);  <span class="comment">// Increments modCount!!</span></div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> E <span class="title">remove</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">       <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span> </span>&#123;</div><div class="line">	   <span class="comment">//调用fastRemove()进行修改。</span></div><div class="line">	   	&#125;</div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">fastRemove</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> </span>&#123;</div><div class="line">        modCount++;</div><div class="line">        <span class="comment">//………此处省略</span></div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Itr();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">	<span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Itr</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</div><div class="line">        <span class="keyword">int</span> cursor;       <span class="comment">// index of next element to return</span></div><div class="line">        <span class="keyword">int</span> lastRet = -<span class="number">1</span>; <span class="comment">// index of last element returned; -1 if no such</span></div><div class="line">        <span class="keyword">int</span> expectedModCount = modCount;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> cursor != size;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">        <span class="function"><span class="keyword">public</span> E <span class="title">next</span><span class="params">()</span> </span>&#123;</div><div class="line">            checkForComodification();</div><div class="line">            <span class="keyword">int</span> i = cursor;</div><div class="line">            <span class="keyword">if</span> (i &gt;= size)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException();</div><div class="line">            Object[] elementData = ArrayList.<span class="keyword">this</span>.elementData;</div><div class="line">            <span class="keyword">if</span> (i &gt;= elementData.length)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            cursor = i + <span class="number">1</span>;</div><div class="line">            <span class="keyword">return</span> (E) elementData[lastRet = i];</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (lastRet &lt; <span class="number">0</span>)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</div><div class="line">            checkForComodification();</div><div class="line"></div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                ArrayList.<span class="keyword">this</span>.remove(lastRet);</div><div class="line">                cursor = lastRet;</div><div class="line">                lastRet = -<span class="number">1</span>;</div><div class="line">                expectedModCount = modCount;</div><div class="line">            &#125; <span class="keyword">catch</span> (IndexOutOfBoundsException ex) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">forEachRemaining</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> E&gt; consumer)</span> </span>&#123;</div><div class="line">            Objects.requireNonNull(consumer);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> size = ArrayList.<span class="keyword">this</span>.size;</div><div class="line">            <span class="keyword">int</span> i = cursor;</div><div class="line">            <span class="keyword">if</span> (i &gt;= size) &#123;</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">final</span> Object[] elementData = ArrayList.<span class="keyword">this</span>.elementData;</div><div class="line">            <span class="keyword">if</span> (i &gt;= elementData.length) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">while</span> (i != size &amp;&amp; modCount == expectedModCount) &#123;</div><div class="line">                consumer.accept((E) elementData[i++]);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// update once at end of iteration to reduce heap write traffic</span></div><div class="line">            cursor = i;</div><div class="line">            lastRet = i - <span class="number">1</span>;</div><div class="line">            checkForComodification();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">checkForComodification</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (modCount != expectedModCount)</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>由以上源码可以看出：</p>
+<ul>
+<li>ListArray中有:<br>属性：<code>int modCount = 0;</code>（记录对集合的修改操作次数）<br>内部类：<code>Itr</code>。（用来返回Iterator对象）<br>方法：<code>add()</code>、<code>remove(int index)</code>、<code>clear()</code>、<code>trimToSize()</code>等。（其操作都会修改modCount的值。）</li>
+<li>返回的Iterator对象中有<code>expectedModCount</code>属性，初始化时使其等于集合对象中的<code>modCount</code>。</li>
+<li>Iterator对象中<code>next()</code>和<code>remove()</code>方法在执行时会比较<code>modCount</code>和<code>expectedModCount</code>的值，若不相等则抛出<code>ConcurrentModificationException</code>异常。</li>
+<li>Iterator对象中<code>remove()</code>方法在调用集合中的方法<code>remove(int index)</code>将集合中的对象进行删除以后，会使<code>expectedModCount = modCount;</code>。</li>
+</ul>
+<p>简单的说就是<strong>集合对象</strong>和<strong>迭代对象</strong>分别有一个<strong>计数器</strong>记录修改操作。使用迭代器中<code>remove()</code>、<code>next()</code>方法前都会<strong>检查两个计数器是否一致</strong>，若<strong>不一致则抛出异常</strong>。迭代器中的计数器只在迭代对象创建和使用迭代器中的<code>remove()</code>方法后，才会和集合中的计数器同步。若在<strong>迭代中调用集合中的方法则会使两个计数器不同步</strong>。</p>
+<h2 id="fail-fast机制"><a href="#fail-fast机制" class="headerlink" title="fail-fast机制"></a>fail-fast机制</h2><p>另外经过查阅以后得知该异常检测机制其实是<code>fail-fast</code>。</p>
+<ul>
+<li>“快速失败”也就是fail-fast，它是Java集合的一种错误检测机制。当多个线程对集合进行结构上的改变的操作时，有可能会产生fail-fast机制。记住是有可能，而不是一定。例如：假设存在两个线程（线程1、线程2），线程1通过Iterator在遍历集合A中的元素，在某个时候线程2修改了集合A的结构（是结构上面的修改，而不是简单的修改集合元素的内容），那么这个时候程序就会抛出 ConcurrentModificationException 异常，从而产生fail-fast机制。</li>
+</ul>
+<h2 id="对开始时问题的进一步解释"><a href="#对开始时问题的进一步解释" class="headerlink" title="对开始时问题的进一步解释"></a>对开始时问题的进一步解释</h2><p>根据前面对源码的分析，得知了 ConcurrentModificationException 异常产生的条件，只要在迭代过程中通过集合本身的方法进行操作就会抛出该异常，然而在最初例子中：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   <span class="keyword">for</span> (String temp:a)&#123;</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">//结果：正常执行。</span></div></pre></td></tr></table></figure></p>
+<p>此时虽然是在迭代过程中使用集合本身的方法进行了修改，但是并没有抛出异常。<br>对上面的例子进行修改，再次测试<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"1"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">/**</span></div><div class="line">   上面解释过，此方法等同于</div><div class="line">   for (String temp:a)&#123;</div><div class="line">       if("1".equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   */</div><div class="line">   <span class="comment">//结果：</span></div><div class="line">   <span class="comment">//java.util.ConcurrentModificationException</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.next(ArrayList.java:851)</span></div><div class="line"></div><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"2"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"><span class="comment">//结果：</span></div><div class="line"><span class="comment">//正常执行</span></div><div class="line"></div><div class="line">List&lt;String&gt; a = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">   a.add(<span class="string">"1"</span>);</div><div class="line">   a.add(<span class="string">"2"</span>);</div><div class="line">   a.add(<span class="string">"3"</span>);</div><div class="line">   <span class="keyword">while</span> (it.hasNext())&#123;</div><div class="line">       String temp = it.next();</div><div class="line">       <span class="keyword">if</span>(<span class="string">"3"</span>.equals(temp))&#123;</div><div class="line">           a.remove(temp);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   <span class="comment">//结果：</span></div><div class="line">   <span class="comment">//java.util.ConcurrentModificationException</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)</span></div><div class="line"><span class="comment">//at java.util.ArrayList$Itr.next(ArrayList.java:851)</span></div></pre></td></tr></table></figure></p>
+<p>使用断点调试一步步执行后，发现问题在于在对倒数第二个对象使用集合内方法进行移除以后，并不会再次进入while循环。此时it.next()并没有执行到，因此不会抛出异常。</p>
+<p>再次从上面贴出的源码分析：<br>在内部类Itr中关于hasNext()方法的定义如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> cursor != size;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>cursor是Itr类中的属性，初始化为0，每当执行next()方法后cursor=cursor+1。</li>
+<li>size则为集合类中的对象的数量。</li>
+<li>在上面的例子中，<strong>移除倒数第二个对象之前，size=3，cursor =2</strong> 。<br>当<strong>移除倒数第二个对象后，size=2，cursor =2</strong>。</li>
+<li>执行<strong>hasNext()返回false</strong>，结束循环。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面的测试用例中，<code>&quot;1&quot;</code>、<code>&quot;3&quot;</code>为条件时抛出异常是因为<code>fail-fast机制</code>的存在，<code>&quot;2&quot;</code>为条件时没抛出异常是因为循环已经结束，并没有执行到会检测该异常的<code>it.next()</code>方法。</p>
+
+                <hr>
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                     style="text-align: right"
+                     data-thread-key="2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/"
+                     data-title="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"
+                     data-url="http://jooop.github.io/2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/"
+                     data-images=""
+                     data-content="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因ConcurrentModifi... | Jooop&#39;s blog ">
+                    <div class="ds-share-inline">
+                        <ul class="ds-share-icons-16">
+                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                        </ul>
+                        <div class="ds-share-icons-more">
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/03/29/JVM知识脉络图/" data-toggle="tooltip" data-placement="top"
+                           title="JVM知识脉络图">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/03/13/java中String对象的创建过程和JVM中的状态分析/" data-toggle="tooltip" data-placement="top"
+                           title="java中String对象的创建过程和JVM中的状态分析">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                         data-thread-key="2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/"
+                         data-title="从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"
+                         data-url="http://jooop.github.io/2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/">
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col">
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#从ArrayList源码探究迭代时修改集合内容会抛出异常的原因"><span class="toc-text">从ArrayList源码探究迭代时修改集合内容会抛出异常的原因</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ConcurrentModificationException异常的产生："><span class="toc-text">ConcurrentModificationException异常的产生：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同样的问题："><span class="toc-text">同样的问题：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从源码解释异常的原因"><span class="toc-text">从源码解释异常的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fail-fast机制"><span class="toc-text">fail-fast机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#对开始时问题的进一步解释"><span class="toc-text">对开始时问题的进一步解释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5 class="text-center">
+                        <a href="/tags/">FEATURED TAGS</a>
+                    </h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#J2SE"
+                           title="J2SE">J2SE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'jooop';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user};
+    (function () {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';
+        ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Jooop 2017
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    Theme by <a href="https://haojen.github.io/">Haojen Ma</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://jooop.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-84260933-1';
+    var _gaDomain = 'jooop.github.io';
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="http://odl4eqqu9.bkt.clouddn.com/ava/ava_cat.PNG">
+</body>
+
+</html>

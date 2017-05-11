@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="一个个人博客">
+    <meta name="keyword" content="null">
+    <meta name="theme-color" content="#600090">
+    <meta name="msapplication-navbutton-color" content="#600090">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#600090">
+	<meta name="google-site-verification" content="c7x8WiOE15RKbJLbCTaZMGqjKzoUdfpyVmrmJ8nTq8M" />
+    <link rel="shortcut icon" href="https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-person-128.png">
+    <link rel="alternate" type="application/atom+xml" title="Jooop" href="/atom.xml">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.css">
+    <title>
+        
+        tags｜Jooop&#39;s blog
+        
+    </title>
+
+    <link rel="canonical" href="http://jooop.github.io/tags/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+</head>
+
+<style>
+
+    header.intro-header {
+        background-image: url('//odl4eqqu9.bkt.clouddn.com/bg/44307-105.jpg')
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="" class="animated fadeIn">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " id="nav-top" data-ispost = "false" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand animated pulse" href="/">
+                <span class="brand-logo">
+                    Jooop
+                </span>
+                's Blog
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/tags/">tags</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+//    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+<!-- Main Content -->
+<style>
+    .intro-header .site-heading {
+        margin: 50px;
+    }
+</style>
+
+<!-- Page Header -->
+<header class="intro-header">
+    <div class="container"
+	style="background-image: url(' http://odl4eqqu9.bkt.clouddn.com/bg/bg_tags.jpg')">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading text-center">
+                    <h1>tags</h1>
+                    <span class="subheading"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <!-- 标签云 -->
+            <div id='tag_cloud' class="tags">
+                
+                <a href="#J2EE" title="J2EE" rel="6">J2EE</a>
+                
+                <a href="#设计模式" title="设计模式" rel="1">设计模式</a>
+                
+                <a href="#JVM" title="JVM" rel="2">JVM</a>
+                
+                <a href="#MySQL" title="MySQL" rel="1">MySQL</a>
+                
+                <a href="#数据结构和算法" title="数据结构和算法" rel="2">数据结构和算法</a>
+                
+                <a href="#工具" title="工具" rel="1">工具</a>
+                
+                <a href="#python" title="python" rel="1">python</a>
+                
+                <a href="#blog" title="blog" rel="1">blog</a>
+                
+                <a href="#J2SE" title="J2SE" rel="1">J2SE</a>
+                
+                <a href="#Linux" title="Linux" rel="1">Linux</a>
+                
+            </div>
+
+            <!-- 标签列表 -->
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="J2EE">
+                    <span class="tag-text">J2EE</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2016/10/11/Cookie和Session/">
+                        <h2 class="post-title">
+                            servlet中的cookie和session
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            servlet中cookie和session的功能和配置
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2016/10/14/JSP基础/">
+                        <h2 class="post-title">
+                            JSP基础
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            对JSP基础内容的整理。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2016/10/02/OSI七层、和TPC连接的建立与终止/">
+                        <h2 class="post-title">
+                            OSI七层、和TPC连接的建立与终止
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            对计算机网原理中比较重要的网络体系、TCP连接的建立和关闭进行总结。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2016/10/09/Java-Servlet相关/">
+                        <h2 class="post-title">
+                            Java Servlet相关
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            学习Java Servlet过程中遇到的问题与经验。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2017/02/17/自定义Struts2框架分析/">
+                        <h2 class="post-title">
+                            自定义Struts框架分析
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            对Struts框架的产生原因、解决的问题、以及实现途径和思想进行分析，加深对框架的理解。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2017/01/29/阿里云配置java-web环境/">
+                        <h2 class="post-title">
+                            阿里云配置java web环境
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            阿里云部署java web和python3项目
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="设计模式">
+                    <span class="tag-text">设计模式</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/04/07/5种JAVA单例模式的实现、原理和演化/">
+                        <h2 class="post-title">
+                            5种JAVA单例模式的实现、原理和演化
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            列举JAVA实现单例模式的五种方法，以及每种方法的优缺点和实现的细节原理。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="JVM">
+                    <span class="tag-text">JVM</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/03/29/JVM知识脉络图/">
+                        <h2 class="post-title">
+                            JVM知识脉络图
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            个人对JVM内存、对象创建的图解和对GC知识脉络的整理，加深对JVM规范和实现的整体性的理解。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2017/03/13/java中String对象的创建过程和JVM中的状态分析/">
+                        <h2 class="post-title">
+                            java中String对象的创建过程和JVM中的状态分析
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            对于String对象的创建过程和存储状态进行分析
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="MySQL">
+                    <span class="tag-text">MySQL</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2016/10/22/MySQL基础知识/">
+                        <h2 class="post-title">
+                            MySQL基础知识
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            对MySQL基础内容的整理，包括配置及遇到的问题，SQL基本操作语句。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="数据结构和算法">
+                    <span class="tag-text">数据结构和算法</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/04/20/java实现敏感词过滤算法/">
+                        <h2 class="post-title">
+                            java实现基于Trie树的敏感词过滤算法
+                        </h2>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+                <div class="post-preview">
+                    <a href="/2017/04/24/九大经典排序算法归纳及JAVA-的实现/">
+                        <h2 class="post-title">
+                            九大经典排序算法归纳及JAVA 的实现
+                        </h2>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="工具">
+                    <span class="tag-text">工具</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/05/03/solr服务配置及编译IKAnalyzer适应版本/">
+                        <h2 class="post-title">
+                            solr服务配置及自行编译IKAnalyzer适应版本
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            配置solr服务，编译并启用适应当前版本的IKAnalyzer分词器。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="python">
+                    <span class="tag-text">python</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/01/29/python3网易爬虫/">
+                        <h2 class="post-title">
+                            python3网易新闻爬虫
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            python3编写网易爬虫，并部署至centos服务器运行。
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="blog">
+                    <span class="tag-text">blog</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2016/09/16/测试用例/">
+                        <h2 class="post-title">
+                            Hexo加Github Page建立个人博客简易用法
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            本文是对自己搭建个人静态博客过程做一个简单的记录，方便以后再次部署
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="J2SE">
+                    <span class="tag-text">J2SE</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/03/16/从ArrayList源码探究迭代时修改集合内容会抛出异常的原因/">
+                        <h2 class="post-title">
+                            从ArrayList源码探究迭代时修改集合内容会抛出异常的原因
+                        </h2>
+                        
+                        <h3 class="post-subtitle">
+                            剖析为什么不能在遍历集合时对集合对象本身修改，以及ConcurrentModificationException异常的产生原因
+                        </h3>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+            <div class="one-tag-list">
+                <span class="fa fa-tag listing-seperator" id="Linux">
+                    <span class="tag-text">Linux</span>
+                </span>
+                
+                <div class="post-preview">
+                    <a href="/2017/04/19/记一次服务器被入侵排查经历/">
+                        <h2 class="post-title">
+                            记一次服务器被入侵排查清除经历
+                        </h2>
+                        
+                    </a>
+                </div>
+                <hr>
+                
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <br>
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/jooop">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Jooop 2017
+                    <br>
+                    <span id="busuanzi_container_site_pv" style="font-size: 12px;">PV: <span id="busuanzi_value_site_pv"></span> Times</span>
+                    <br>
+                    Theme by <a href="https://haojen.github.io/">Haojen Ma</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://jooop.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-84260933-1';
+    var _gaDomain = 'jooop.github.io';
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- swiftype -->
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','null','2.0.0');
+</script>
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!--wechat title img-->
+<img class="wechat-title-img" src="http://odl4eqqu9.bkt.clouddn.com/ava/ava_cat.PNG">
+</body>
+
+</html>

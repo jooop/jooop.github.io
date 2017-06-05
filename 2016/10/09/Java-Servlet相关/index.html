@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="一个个人博客">
+    <meta name="description" content="Jooop的个人博客">
     <meta name="keyword" content="null">
     <meta name="theme-color" content="#600090">
     <meta name="msapplication-navbutton-color" content="#600090">
@@ -183,28 +183,6 @@
 <h2 id="Java-Servlet相关问题"><a href="#Java-Servlet相关问题" class="headerlink" title="Java Servlet相关问题"></a>Java Servlet相关问题</h2><h3 id="使用getParameterMap-读取request并输出所有的参数"><a href="#使用getParameterMap-读取request并输出所有的参数" class="headerlink" title="使用getParameterMap()读取request并输出所有的参数"></a>使用getParameterMap()读取request并输出所有的参数</h3><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShowParameters</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</div><div class="line"></div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span></div><div class="line">			<span class="keyword">throws</span> ServletException, IOException &#123;</div><div class="line">		response.setContentType(<span class="string">"text/html;charset=UTF-8"</span>);</div><div class="line">		PrintWriter out = response.getWriter();</div><div class="line">		String title = <span class="string">"Reading All Request Parameters"</span>;</div><div class="line">		out.println(<span class="string">"&lt;html&gt;&lt;head&gt;&lt;title&gt;读取参数&lt;/title&gt;&lt;/head&gt;"</span></div><div class="line">				+ <span class="string">"&lt;body bgcolor='#FDF5E6'&gt;\n"</span> </div><div class="line">				+ <span class="string">"&lt;h1 align=center&gt;"</span> + title + <span class="string">"&lt;/h1&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;table border=1 align=center&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;tr bgcolor='#FFAD00'&gt;\n"</span></div><div class="line">				+<span class="string">"&lt;th&gt;Parameter Name&lt;th&gt;Parameter Value(s)"</span></div><div class="line">				);</div><div class="line"></div><div class="line">		Map&lt;String,String[]&gt; map = request.getParameterMap();    </div><div class="line">		<span class="keyword">for</span> (String key : map.keySet()) &#123;</div><div class="line">			out.print(<span class="string">"&lt;tr&gt;&lt;td&gt;"</span> + key + <span class="string">"\n&lt;td&gt;"</span>);</div><div class="line">			<span class="keyword">if</span>(map.get(key).length == <span class="number">1</span>)&#123;</div><div class="line">				String paramValue = map.get(key)[<span class="number">0</span>];</div><div class="line">				<span class="keyword">if</span>(paramValue.length() == <span class="number">0</span>)</div><div class="line">					out.println(<span class="string">"&lt;i&gt;No Value&lt;/i&gt;"</span>);</div><div class="line">				<span class="keyword">else</span></div><div class="line">					out.println(paramValue);</div><div class="line">			&#125;<span class="keyword">else</span>&#123;</div><div class="line">				out.println(<span class="string">"&lt;ul&gt;"</span>);</div><div class="line">				<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; map.get(key).length; i++)&#123;</div><div class="line">					out.println(<span class="string">"&lt;li&gt;"</span> + map.get(key)[i]);</div><div class="line">				&#125;</div><div class="line">				out.println(<span class="string">"&lt;/ul&gt;"</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		out.println(<span class="string">"&lt;/table&gt;\n&lt;/body&gt;&lt;/html&gt;"</span>);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
                 <hr>
                 
-                <!-- 多说 Share start -->
-                <div class="ds-share"
-                     style="text-align: right"
-                     data-thread-key="2016/10/09/Java-Servlet相关/"
-                     data-title="Java Servlet相关"
-                     data-url="http://jooop.github.io/2016/10/09/Java-Servlet相关/"
-                     data-images=""
-                     data-content="tomcat相关问题tomcat启动时闪退问题调试方法：dos中以debug模式启动tomca... | Jooop&#39;s blog ">
-                    <div class="ds-share-inline">
-                        <ul class="ds-share-icons-16">
-                            <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
-                            <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
-                            <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
-                            <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
-                        </ul>
-                        <div class="ds-share-icons-more">
-                        </div>
-                    </div>
-                    <hr>
-                </div>
-                <!-- 多说 Share end-->
-                
 
                 <ul class="pager">
                     
@@ -222,17 +200,13 @@
                 </ul>
 
                 
-                <!-- 多说评论框 start -->
-                <div class="comment">
-                    <div class="ds-thread"
-                         data-thread-key="2016/10/09/Java-Servlet相关/"
-                         data-title="Java Servlet相关"
-                         data-url="http://jooop.github.io/2016/10/09/Java-Servlet相关/">
-                    </div>
-                </div>
-                <!-- 多说评论框 end -->
-                
 
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
                 
 
             </div>
@@ -277,25 +251,23 @@
 </article>
 
 
-<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-    // dynamic User by Hux
-    var _user = 'jooop';
 
-    // duoshuo comment query.
-    var duoshuoQuery = {short_name: _user};
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "jooop";
+    var disqus_identifier = "http://jooop.github.io/2016/10/09/Java-Servlet相关/";
+    var disqus_url = "http://jooop.github.io/2016/10/09/Java-Servlet相关/";
+
     (function () {
-        var ds = document.createElement('script');
-        ds.type = 'text/javascript';
-        ds.async = true;
-        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-        ds.charset = 'UTF-8';
-        (document.getElementsByTagName('head')[0]
-        || document.getElementsByTagName('body')[0]).appendChild(ds);
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
 </script>
-<!-- 多说公共JS代码 end -->
-
+<!-- disqus 公共JS代码 end -->
 
 
 
